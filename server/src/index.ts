@@ -68,7 +68,7 @@ export { RateLimiter } from "./rate-limiter"
 
 // import { getAssetFromKV, mapRequestToAsset } from '@cloudflare/kv-asset-handler'
 
-const HTML = 'Hello world';
+// const HTML = 'Hello world';
 
 // addEventListener('fetch', event => {
 //   try {
@@ -111,7 +111,7 @@ export default {
         //
         // return response;
 
-        return new Response(HTML, {headers: {"Content-Type": "text/html;charset=UTF-8"}});
+        return new Response('Hello world (v10)', {headers: {"Content-Type": "text/html;charset=UTF-8"}});
       }
 
       switch (path[0]) {
