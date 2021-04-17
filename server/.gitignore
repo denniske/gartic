@@ -3,4 +3,4 @@ metadata.json
 .idea
 node_modules
 dist
-
+dist-dev

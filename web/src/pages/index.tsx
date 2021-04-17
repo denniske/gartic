@@ -12,18 +12,23 @@ import {faClock, faTimes} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {useMutate, useSelector} from "~/state/store";
 import {useDispatch} from "react-redux";
+import {useRouter} from "next/router";
+import {useEffect} from "react";
+import {join} from "~/components/connection";
 
 
 export default function Home() {
+    const router = useRouter();
     const players = useSelector((state) => state.players);
-    const count = useSelector((state) => state.count);
-    const mutate = useMutate()
-    const dispatch = useDispatch()
-    const increment = () =>
-        dispatch({
-            type: 'INCREMENT',
-        });
+    const connected = useSelector((state) => state.connected);
 
+    useEffect(() => {
+        if (!connected) return;
+        // console.log('query', router.query);
+        // join(router.query?.name as string ?? 'Somebody');
+        let params = new URLSearchParams(window?.location.search);
+        join(params.get('name') ?? 'Somebody');
+    }, [connected]);
 
     const playerList = Array.from({length: 10}, (_, i) => players.length > i ? players[i] : null);
 
@@ -50,7 +55,7 @@ export default function Home() {
             <div className="flex-auto bg-purple-900 rounded-xl p-4 space-y-3">
 
                 <div className="flex justify-center">
-                    <div className="uppercase text-green-400 text-3xl font-bold text-shadow" onClick={increment}>
+                    <div className="uppercase text-green-400 text-3xl font-bold text-shadow">
                         Players {players.length}/{playerList.length}
                     </div>
                 </div>

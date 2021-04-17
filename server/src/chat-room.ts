@@ -6,11 +6,12 @@
 // to all others.
 import {handleErrors} from "./util";
 import {RateLimiterClient} from './rate-limiter-client';
+import {WebSocketLike} from "./types";
 
 interface ISession {
   name?: string;
   quit?: boolean;
-  webSocket: WebSocket;
+  webSocket: WebSocketLike;
   blockedMessages?: string[];
 }
 
@@ -79,16 +80,20 @@ export class ChatRoom implements DurableObject {
   }
 
   // handleSession() implements our WebSocket-based chat protocol.
-  async handleSession(webSocket: WebSocket, ip: any) {
+  async handleSession(webSocket: WebSocketLike, ip: any) {
     // Accept our end of the WebSocket. This tells the runtime that we'll be terminating the
     // WebSocket in JavaScript, not sending it elsewhere.
     webSocket.accept();
 
     // Set up our rate limiter client.
-    let limiterId = this.env.limiters.idFromName(ip);
-    let limiter = new RateLimiterClient(
-        () => this.env.limiters.get(limiterId),
-        (err: any) => webSocket.close(1011, err.stack));
+    let limiterId: any = null;
+    let limiter: RateLimiterClient | null = null;
+    if (this.env.limiters) {
+      limiterId = this.env.limiters.idFromName(ip);
+      limiter = new RateLimiterClient(
+          () => this.env.limiters.get(limiterId),
+          (err: any) => webSocket.close(1011, err.stack));
+    }
 
     // Create our session and add it to the sessions list.
     // We don't send any messages to the client until it has sent us the initial user info
@@ -127,7 +132,7 @@ export class ChatRoom implements DurableObject {
         }
 
         // Check if the user is over their rate limit and reject the message if so.
-        if (!limiter.checkLimit()) {
+        if (limiter && !limiter.checkLimit()) {
           webSocket.send(JSON.stringify({
             error: "Your IP is being rate-limited, please try again later."
           }));
@@ -135,6 +140,9 @@ export class ChatRoom implements DurableObject {
         }
 
         // I guess we'll use JSON.
+
+        console.log('parse', msg);
+
         let data = JSON.parse(msg.data);
 
         if (!receivedUserInfo) {
