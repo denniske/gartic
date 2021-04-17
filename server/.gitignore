@@ -1,0 +1,6 @@
+credentials.conf
+metadata.json
+.idea
+node_modules
+dist
+

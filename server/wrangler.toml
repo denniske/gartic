@@ -1,0 +1,19 @@
+name = "edge-chat-demo"
+type = "javascript"
+workers_dev = true
+# Add your account ID here
+account_id = "dad34caab63a3c6700c7d624fd4aeb47"
+# site = {bucket = "./public", entry-point = "."}
+
+[build]
+command = "npm install && npm run build"
+# The "modules" upload format is required for all projects that implement a Durable Object namespace.
+upload_format = "modules"
+# Make sure we don't upload the sourcemap as part of the bundle
+upload_exclude = ["*.map"]
+
+[durable_objects]
+bindings = [
+  { name = "rooms", class_name = "ChatRoom" },
+  { name = "limiters", class_name = "RateLimiter" }
+]
