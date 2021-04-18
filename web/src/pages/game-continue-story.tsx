@@ -14,19 +14,33 @@ import {useMutate, useSelector} from "~/state/store";
 import {useDispatch} from "react-redux";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
-import {actionStory, join, start} from "~/components/connection";
+import {actionStory, join, actionStart} from "~/components/connection";
 
 
-export default function GameStart() {
+export default function GameContinueStory() {
     const user = useSelector(state => state.user);
-    const [text, setText] = useState(user.name + '0');
+    const playersDone = useSelector((state) => state.playersDone);
+    const players = useSelector((state) => state.players);
+    const game = useSelector((state) => state.game);
+
+    const [text, setText] = useState(user.name + game.round);
     const [done, setDone] = useState(false);
 
     return (
         <div className="p-4 flex md:flex-row flex-col max-w-7xl space-y-5">
 
             <div className="text-gray-100">
-                Start your story!
+                Continue the story!
+            </div>
+
+            <div className="text-gray-100">
+                {playersDone} / {players.length}
+            </div>
+
+            <div className="mt-1">
+                <div className="bg-gray-300 shadow-sm px-3 py-2 mt-1 block w-full sm:text-sm border-gray-300 rounded-md">
+                    {game.previousStoryText}
+                </div>
             </div>
 
             <div className="mt-1">

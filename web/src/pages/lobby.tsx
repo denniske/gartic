@@ -14,7 +14,7 @@ import {useMutate, useSelector} from "~/state/store";
 import {useDispatch} from "react-redux";
 import {useRouter} from "next/router";
 import {useEffect} from "react";
-import {join, start} from "~/components/connection";
+import {join, actionStart} from "~/components/connection";
 
 
 export default function Lobby() {
@@ -72,7 +72,7 @@ export default function Lobby() {
                     </span>
                 </button>
                 <button
-                    onClick={() => start()}
+                    onClick={() => actionStart()}
                     className="inline-flex justify-center items-center py-2 px-4 border border-transparent button-shadow text-sm font-medium rounded-md text-white bg-white hover:bg-gray-300"
                 >
                     <FontAwesomeIcon className="text-green-500 text-shadow" icon={faPlay}/>

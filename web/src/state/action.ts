@@ -32,21 +32,35 @@ export function removePlayerById(playerId: string) {
 }
 
 
+export interface GameState {
+    screen: string;
+    previousStoryText?: string;
+
+    // Debug
+    round?: number;
+}
+
 export interface AppState {
+    game: GameState;
     connected: boolean;
     user: IPlayer;
     config: IConfig;
     players: IPlayer[];
+    playersDone: number;
     lastUpdate: number;
     light: boolean;
     count: number;
 }
 
 export const initialState: AppState = {
+    game: {
+        screen: '',
+    },
     connected: false,
     user: {},
     config: {},
     players: [],
+    playersDone: 0,
     lastUpdate: 0,
     light: false,
     count: 0,

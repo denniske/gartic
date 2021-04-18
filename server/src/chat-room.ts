@@ -7,8 +7,9 @@
 import {handleErrors} from "./util";
 import {RateLimiterClient} from './rate-limiter-client';
 import {WebSocketLike} from "./types";
+import GameServer from "./game-server";
 
-interface ISession {
+export interface ISession {
   id?: string;
   name?: string;
   quit?: boolean;
@@ -22,8 +23,9 @@ export class ChatRoom implements DurableObject {
   private storage: DurableObjectStorage;
   private env: any;
   private adminSessionId?: string;
-  private sessions: ISession[];
+  sessions: ISession[];
   private lastTimestamp: number;
+  private gameServer: GameServer;
 
   constructor(controller: DurableObjectState, env: any) {
     // `controller.storage` provides access to our durable storage. It provides a simple KV
@@ -42,6 +44,8 @@ export class ChatRoom implements DurableObject {
     // no need to store this to disk since we assume if the object is destroyed and recreated, much
     // more than a millisecond will have gone by.
     this.lastTimestamp = 0;
+
+    this.gameServer = new GameServer(this);
   }
 
   // The system will call fetch() whenever an HTTP request is sent to this Object. Such requests
@@ -200,6 +204,10 @@ export class ChatRoom implements DurableObject {
           receivedUserInfo = true;
 
           return;
+        }
+
+        if (data.action) {
+          this.gameServer.processAction(session, data);
         }
 
         if (data.kick) {

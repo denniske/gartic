@@ -16,11 +16,14 @@ import {useRouter} from "next/router";
 import {useEffect} from "react";
 import {join} from "~/components/connection";
 import Lobby from "~/pages/lobby";
-import GameStart from "~/pages/game-start";
+import GameStartStory from "~/pages/game-start-story";
+import GameContinueStory from "~/pages/game-continue-story";
+import GameFinished from "~/pages/game-finished";
 
 
 export default function Home() {
     const router = useRouter();
+    const game = useSelector((state) => state.game);
     const user = useSelector((state) => state.user);
     const players = useSelector((state) => state.players);
     const connected = useSelector((state) => state.connected);
@@ -45,8 +48,25 @@ export default function Home() {
     return (
         <div className="p-4 flex md:flex-row flex-col max-w-7xl mx-auto space-y-5">
 
-            {/*<Lobby/>*/}
-            <GameStart/>
+            {
+                game.screen === '' &&
+                <Lobby/>
+            }
+
+            {
+                game.screen === 'startStory' &&
+                <GameStartStory/>
+            }
+
+            {
+                game.screen === 'continueStory' &&
+                <GameContinueStory/>
+            }
+
+            {
+                game.screen === 'finished' &&
+                <GameFinished/>
+            }
 
 
             {/*<div className="flex-1 bg-purple-900 rounded-xl p-4 space-y-3">*/}

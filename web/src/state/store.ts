@@ -20,6 +20,8 @@ export function exec(mutation: StateMutation) {
     }
 }
 
+export type Mutate = (m: StateMutation) => { mutation: (state: AppState) => void; type: string };
+
 export type StateMutation = (state: AppState) => void;
 
 export function useMutate() {
