@@ -9,15 +9,19 @@ import {RateLimiterClient} from './rate-limiter-client';
 import {WebSocketLike} from "./types";
 
 interface ISession {
+  id?: string;
   name?: string;
   quit?: boolean;
   webSocket: WebSocketLike;
   blockedMessages?: string[];
 }
 
+const closeCodeKicked = 1100;
+
 export class ChatRoom implements DurableObject {
   private storage: DurableObjectStorage;
   private env: any;
+  private adminSessionId?: string;
   private sessions: ISession[];
   private lastTimestamp: number;
 
@@ -104,13 +108,13 @@ export class ChatRoom implements DurableObject {
     // Queue "join" messages for all online users, to populate the client's roster.
     this.sessions.forEach(otherSession => {
       if (otherSession.name) {
-        session.blockedMessages?.push(JSON.stringify({joined: otherSession.name}));
+        session.blockedMessages?.push(JSON.stringify({joined: { id: otherSession.id, name: otherSession.name}}));
       }
     });
 
     // Load the last 100 messages from the chat history stored on disk, and send them to the
     // client.
-    let storage = await this.storage.list({reverse: true, limit: 100});
+    let storage = await this.storage.list({reverse: true, limit: 100, prefix: 'message:'});
     let backlog = [...storage.values()];
     backlog.reverse();
     backlog.forEach(value => {
@@ -148,6 +152,14 @@ export class ChatRoom implements DurableObject {
         if (!receivedUserInfo) {
           // The first message the client sends is the user info message with their name. Save it
           // into their session object.
+
+          if (data.id == null) {
+            webSocket.send(JSON.stringify({error: "No id specified."}));
+            webSocket.close(1009, "No id specified.");
+            return;
+          }
+
+          session.id = data.id?.toString();
           session.name = "" + (data.name || "anonymous");
 
           // Don't let people use ridiculously long names. (This is also enforced on the client,
@@ -164,8 +176,23 @@ export class ChatRoom implements DurableObject {
           });
           delete session.blockedMessages;
 
+          if (this.adminSessionId == null) {
+            this.adminSessionId = session.id;
+            this.broadcast({
+              config: {
+                adminSessionId: this.adminSessionId,
+              },
+            });
+          } else {
+            webSocket.send(JSON.stringify({
+              config: {
+                adminSessionId: this.adminSessionId,
+              },
+            }));
+          }
+
           // Broadcast to all other connections that this user has joined.
-          this.broadcast({joined: session.name});
+          this.broadcast({joined: { id: session.id, name: session.name }});
 
           webSocket.send(JSON.stringify({ready: true}));
 
@@ -175,35 +202,38 @@ export class ChatRoom implements DurableObject {
           return;
         }
 
-
-
-
-        // Construct sanitized message for storage and broadcast.
-        data = { name: session.name, message: "" + data.message + ' (v4)' };
-
-        // Block people from sending overly long messages. This is also enforced on the client,
-        // so to trigger this the user must be bypassing the client code.
-        if (data.message.length > 256) {
-          webSocket.send(JSON.stringify({error: "Message too long."}));
-          return;
+        if (data.kick) {
+          const sessionToKick = this.sessions.find(s => s.id == data.kick);
+          if (sessionToKick) {
+            sessionToKick.webSocket.close(closeCodeKicked, 'kicked');
+          }
         }
 
-        // Add timestamp. Here's where this.lastTimestamp comes in -- if we receive a bunch of
-        // messages at the same time (or if the clock somehow goes backwards????), we'll assign
-        // them sequential timestamps, so at least the ordering is maintained.
-        data.timestamp = Math.max(Date.now(), this.lastTimestamp + 1);
-        this.lastTimestamp = data.timestamp;
+        if (data.message) {
+          // Construct sanitized message for storage and broadcast.
+          data = { name: session.name, message: "" + data.message + ' (v4)' };
 
-        // Broadcast the message to all other WebSockets.
-        let dataStr = JSON.stringify(data);
-        this.broadcast(dataStr);
+          // Block people from sending overly long messages. This is also enforced on the client,
+          // so to trigger this the user must be bypassing the client code.
+          if (data.message.length > 256) {
+            webSocket.send(JSON.stringify({error: "Message too long."}));
+            return;
+          }
 
-        // Save message.
-        let key = new Date(data.timestamp).toISOString();
-        await this.storage.put(key, dataStr);
+          // Add timestamp. Here's where this.lastTimestamp comes in -- if we receive a bunch of
+          // messages at the same time (or if the clock somehow goes backwards????), we'll assign
+          // them sequential timestamps, so at least the ordering is maintained.
+          data.timestamp = Math.max(Date.now(), this.lastTimestamp + 1);
+          this.lastTimestamp = data.timestamp;
 
+          // Broadcast the message to all other WebSockets.
+          let dataStr = JSON.stringify(data);
+          this.broadcast(dataStr);
 
-
+          // Save message.
+          let key = 'message:' + new Date(data.timestamp).toISOString();
+          await this.storage.put(key, dataStr);
+        }
 
       } catch (err) {
         // Report any exceptions directly back to the client. As with our handleErrors() this
@@ -218,11 +248,27 @@ export class ChatRoom implements DurableObject {
       session.quit = true;
       this.sessions = this.sessions.filter(member => member !== session);
       if (session.name) {
-        this.broadcast({quit: session.name});
+        this.broadcast({quit: session.id});
       }
+      this.determineNewAdmin();
     };
     webSocket.addEventListener("close", closeOrErrorHandler);
     webSocket.addEventListener("error", closeOrErrorHandler);
+  }
+
+  determineNewAdmin() {
+    if (this.sessions.find(s => s.id === this.adminSessionId) == null) {
+      if (this.sessions.length == 0) {
+        this.adminSessionId = undefined;
+        return;
+      }
+      this.adminSessionId = this.sessions[0].id;
+      this.broadcast({
+        config: {
+          adminSessionId: this.adminSessionId,
+        },
+      });
+    }
   }
 
   // broadcast() broadcasts a message to all clients.
@@ -259,5 +305,6 @@ export class ChatRoom implements DurableObject {
         this.broadcast({quit: quitter.name});
       }
     });
+    this.determineNewAdmin();
   }
 }

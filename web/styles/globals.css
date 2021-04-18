@@ -19,6 +19,10 @@ body {
     font-family: Nunito;
 }
 
+.button-shadow {
+    box-shadow: rgb(48, 26, 107) 0px 6px 0px 0px;
+}
+
 .text-shadow {
     -webkit-text-stroke: 2px black;
     /*-webkit-text-fill-color: white;*/
