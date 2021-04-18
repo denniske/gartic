@@ -7,6 +7,12 @@ export function connected() {
     };
 }
 
+export function disconnected() {
+    return (state: AppState) => {
+        state.connected = false;
+    };
+}
+
 export function updateConfig(config: IConfig) {
     return (state: AppState) => {
         Object.assign(state.config, config);
@@ -31,6 +37,12 @@ export function removePlayerById(playerId: string) {
     };
 }
 
+export function clearPlayers() {
+    return (state: AppState) => {
+        state.players = [];
+    };
+}
+
 
 export interface GameState {
     screen: string;
@@ -43,6 +55,7 @@ export interface GameState {
 export interface AppState {
     game: GameState;
     connected: boolean;
+    code: string;
     user: IPlayer;
     config: IConfig;
     players: IPlayer[];
@@ -57,6 +70,7 @@ export const initialState: AppState = {
         screen: '',
     },
     connected: false,
+    code: undefined,
     user: {},
     config: {},
     players: [],

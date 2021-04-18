@@ -74,8 +74,6 @@ const controller = {
 };
 const env = {};
 
-const chatRoom = new ChatRoom(controller, env);
-
 console.log('Started');
 
 // This code generates unique userid for everyuser.
@@ -111,8 +109,13 @@ class WebsocketMock implements WebSocketLike {
     }
 }
 
+const chatRooms = new Map<string, ChatRoom>();
 
 wsServer.on('request', function(request) {
+    console.log(request.httpRequest.url);
+
+    const code = request.httpRequest.url?.replace('/', '')!;
+
     var userID = getUniqueID();
     console.log((new Date()) + ' Recieved a new connection from origin ' + request.origin + '.');
     // You can rewrite this part of the code to accept only the requests from allowed origin
@@ -121,5 +124,11 @@ wsServer.on('request', function(request) {
     console.log('connected: ' + userID + ' in ' + Object.getOwnPropertyNames(clients))
 
     const webSocketMock = new WebsocketMock(connection);
+
+    if (!chatRooms.has(code)) {
+        chatRooms.set(code, new ChatRoom(controller, env))
+    }
+
+    const chatRoom = chatRooms.get(code)!;
     chatRoom.handleSession(webSocketMock, '127.0.0.1');
 });

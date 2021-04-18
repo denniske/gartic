@@ -5,11 +5,11 @@ import {useMutate, useStore} from "~/state/store";
 import {Provider} from "react-redux";
 
 function ConnectionHandler({ children }: any) {
-    const mutate = useMutate();
-
-    useEffect(() => {
-        initConnection(mutate);
-    }, []);
+    // const mutate = useMutate();
+    //
+    // useEffect(() => {
+    //     initConnection(mutate);
+    // }, []);
 
     return children;
 }

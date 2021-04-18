@@ -1,6 +1,15 @@
 import {ICloseEvent, w3cwebsocket as W3CWebSocket} from "websocket";
 import {Mutate, StateMutation} from "~/state/store";
-import {addPlayer, AppState, connected, removePlayerById, updateConfig, updateUser} from "~/state/action";
+import {
+    addPlayer,
+    AppState,
+    clearPlayers,
+    connected,
+    disconnected,
+    removePlayerById,
+    updateConfig,
+    updateUser
+} from "~/state/action";
 import {GameClient} from "~/components/game-client";
 
 
@@ -16,13 +25,14 @@ const getUniqueID = () => {
     return s4() + s4() + '-' + s4();
 };
 
-export function initConnection(_mutate: Mutate) {
+export function initConnection(_mutate: Mutate, code: string) {
     mutate = _mutate;
 
     gameClient = new GameClient(mutate);
 
-    client = new W3CWebSocket('ws://127.0.0.1:8000');
-    // const client = new W3CWebSocket('ws://edge-chat-demo.cloudflareworkers.com/api/room/house2/websocket');
+    client = new W3CWebSocket(`ws://127.0.0.1:8000/${code}`);
+    // client = new W3CWebSocket(`ws://gartic.cloudflareworkers.com/api/room/${code}/websocket`);
+    // client = new W3CWebSocket(`ws://edge-chat-demo.cloudflareworkers.com/api/room/${code}/websocket`);
 
     client.onopen = () => {
         console.log('WebSocket Client Connected');
@@ -37,7 +47,7 @@ export function initConnection(_mutate: Mutate) {
             gameClient.processActionFromServer(message);
         }
         if (message.joined) {
-            mutate(addPlayer({ id: message.joined.id, name: message.joined.name }));
+            mutate(addPlayer({id: message.joined.id, name: message.joined.name}));
         }
         if (message.config) {
             mutate(updateConfig(message.config));
@@ -48,17 +58,20 @@ export function initConnection(_mutate: Mutate) {
     };
 
     client.onclose = (event: ICloseEvent) => {
-      if (event.code === closeCodeKicked) {
-          console.log('You were kicked.');
-      } else {
-          console.log('Connection lost.');
-      }
+        mutate(disconnected());
+        if (event.code === closeCodeKicked) {
+            console.log('You were kicked.');
+        } else {
+            console.log('Connection lost.');
+        }
     };
 }
 
+
 export function join(name: string) {
-    const user = { id: getUniqueID(), name };
+    const user = {id: getUniqueID(), name};
     mutate(updateUser(user));
+    mutate(clearPlayers());
     client.send(JSON.stringify(user));
 }
 
@@ -72,6 +85,11 @@ export function actionStart() {
 
 export function actionStory(text: string) {
     client.send(JSON.stringify({action: 'story', text}));
+}
+
+export function quit() {
+    mutate(updateUser({id: undefined, name: undefined}));
+    client.close();
 }
 
 

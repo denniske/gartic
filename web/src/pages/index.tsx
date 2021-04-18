@@ -19,6 +19,7 @@ import Lobby from "~/pages/lobby";
 import GameStartStory from "~/pages/game-start-story";
 import GameContinueStory from "~/pages/game-continue-story";
 import GameFinished from "~/pages/game-finished";
+import Landing from "~/pages/landing";
 
 
 export default function Home() {
@@ -28,28 +29,32 @@ export default function Home() {
     const players = useSelector((state) => state.players);
     const connected = useSelector((state) => state.connected);
 
-    useEffect(() => {
-        if (!connected) return;
-        // console.log('query', router.query);
-        // join(router.query?.name as string ?? 'Somebody');
-        let params = new URLSearchParams(window?.location.search);
-        join(params.get('name') ?? 'Somebody');
-    }, [connected]);
+    // useEffect(() => {
+    //     if (!connected) return;
+    //     // console.log('query', router.query);
+    //     // join(router.query?.name as string ?? 'Somebody');
+    //     let params = new URLSearchParams(window?.location.search);
+    //     join(params.get('name') ?? 'Somebody');
+    // }, [connected]);
 
     // const playerList = Array.from({length: 10}, (_, i) => players.length > i ? players[i] : null);
 
-    if (!user?.name) {
-        return (
-            <div className="p-4 flex md:flex-row flex-col max-w-7xl mx-auto space-y-5"/>
-        );
-    }
+    // if (!user?.name) {
+    //     return (
+    //         <div className="p-4 flex md:flex-row flex-col max-w-7xl mx-auto space-y-5"/>
+    //     );
+    // }
 
     // <div className="bg-purple-800 p-4 flex md:flex-row flex-col min-h-screen max-w-7xl mx-auto space-y-3">
     return (
         <div className="p-4 flex md:flex-row flex-col max-w-7xl mx-auto space-y-5">
 
             {
-                game.screen === '' &&
+                game.screen === '' && !user?.name &&
+                <Landing/>
+            }
+            {
+                game.screen === '' && user?.name &&
                 <Lobby/>
             }
 
