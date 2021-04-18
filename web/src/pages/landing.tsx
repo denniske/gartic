@@ -29,20 +29,21 @@ export default function Landing() {
         setPlaceholderName(`CoolName${Math.floor(Math.random() * 9999)}`);
     }, []);
 
-    useEffect(() => {
-        if (connected) {
-            join(name || placeholderName);
-        }
-    }, [connected]);
+    // useEffect(() => {
+    //     if (connected) {
+    //         join(name || placeholderName);
+    //     }
+    // }, [connected]);
 
     const code = router.query?.code as string;
 
-    const init = () => {
+    const init = async () => {
         const gameCode = code || Math.floor(Math.random() * 9999).toString();
         mutate(state => {
             state.code = gameCode;
         });
-        initConnection(mutate, gameCode);
+        await initConnection(mutate, gameCode);
+        join(name || placeholderName);
     };
 
     return (

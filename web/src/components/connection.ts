@@ -16,7 +16,7 @@ import {GameClient} from "~/components/game-client";
 let client = null;
 let mutate = null;
 
-const closeCodeKicked = 1100;
+const closeReasonKicked = 'REASON_KICKED';
 
 let gameClient: GameClient;
 
@@ -25,50 +25,54 @@ const getUniqueID = () => {
     return s4() + s4() + '-' + s4();
 };
 
-export function initConnection(_mutate: Mutate, code: string) {
-    mutate = _mutate;
+export function initConnection(_mutate: Mutate, code: string): Promise<void> {
+    return new Promise(resolve => {
+        mutate = _mutate;
 
-    gameClient = new GameClient(mutate);
+        gameClient = new GameClient(mutate);
 
-    console.log('ENVIRONMENT', process.env.NEXT_PUBLIC_ENVIRONMENT);
+        console.log('ENVIRONMENT', process.env.NEXT_PUBLIC_ENVIRONMENT);
 
-    if (process.env.NEXT_PUBLIC_ENVIRONMENT == 'development') {
-        client = new W3CWebSocket(`ws://127.0.0.1:8000/${code}`);
-    } else {
-        client = new W3CWebSocket(`wss://gartic.denniske.workers.dev/api/room/${code}/websocket`);
-    }
-
-    client.onopen = () => {
-        console.log('WebSocket Client Connected');
-        mutate(connected());
-    };
-
-    client.onmessage = (messageEvent) => {
-        const message = JSON.parse(messageEvent.data as string);
-        console.log(message);
-
-        if (message.action) {
-            gameClient.processActionFromServer(message);
-        }
-        if (message.joined) {
-            mutate(addPlayer({id: message.joined.id, name: message.joined.name}));
-        }
-        if (message.config) {
-            mutate(updateConfig(message.config));
-        }
-        if (message.quit) {
-            mutate(removePlayerById(message.quit));
-        }
-    };
-
-    client.onclose = (event: ICloseEvent) => {
-        mutate(disconnected());
-        if (event.code === closeCodeKicked) {
-            console.log('You were kicked.');
+        if (process.env.NEXT_PUBLIC_ENVIRONMENT == 'development') {
+            client = new W3CWebSocket(`ws://127.0.0.1:8000/${code}`);
         } else {
-            console.log('Connection lost.', event);
+            client = new W3CWebSocket(`wss://gartic.denniske.workers.dev/api/room/${code}/websocket`);
         }
-    };
+
+        client.onopen = () => {
+            console.log('WebSocket Client Connected');
+            mutate(connected());
+            resolve();
+        };
+
+        client.onmessage = (messageEvent) => {
+            const message = JSON.parse(messageEvent.data as string);
+            console.log(message);
+
+            if (message.action) {
+                gameClient.processActionFromServer(message);
+            }
+            if (message.joined) {
+                mutate(addPlayer({id: message.joined.id, name: message.joined.name}));
+            }
+            if (message.config) {
+                mutate(updateConfig(message.config));
+            }
+            if (message.quit) {
+                mutate(removePlayerById(message.quit));
+            }
+        };
+
+        client.onclose = (event: ICloseEvent) => {
+            mutate(disconnected());
+            if (event.reason === closeReasonKicked) {
+                console.log('You were kicked.');
+                mutate(updateUser({id: undefined, name: undefined}));
+            } else {
+                console.log('Connection lost.', event);
+            }
+        };
+    });
 }
 
 

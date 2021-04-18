@@ -17,7 +17,7 @@ export interface ISession {
   blockedMessages?: string[];
 }
 
-const closeCodeKicked = 1100;
+const closeReasonKicked = 'REASON_KICKED';
 
 export class ChatRoom implements DurableObject {
   private storage: DurableObjectStorage;
@@ -213,7 +213,7 @@ export class ChatRoom implements DurableObject {
         if (data.kick) {
           const sessionToKick = this.sessions.find(s => s.id == data.kick);
           if (sessionToKick) {
-            sessionToKick.webSocket.close(closeCodeKicked, 'kicked');
+            sessionToKick.webSocket.close(1000, closeReasonKicked);
           }
         }
 
