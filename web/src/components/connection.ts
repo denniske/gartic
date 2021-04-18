@@ -35,7 +35,7 @@ export function initConnection(_mutate: Mutate, code: string) {
     if (process.env.NEXT_PUBLIC_ENVIRONMENT == 'development') {
         client = new W3CWebSocket(`ws://127.0.0.1:8000/${code}`);
     } else {
-        client = new W3CWebSocket(`ws://gartic.denniske.workers.dev/api/room/${code}/websocket`);
+        client = new W3CWebSocket(`wss://gartic.denniske.workers.dev/api/room/${code}/websocket`);
     }
 
     client.onopen = () => {
