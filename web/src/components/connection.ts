@@ -30,9 +30,13 @@ export function initConnection(_mutate: Mutate, code: string) {
 
     gameClient = new GameClient(mutate);
 
-    client = new W3CWebSocket(`ws://127.0.0.1:8000/${code}`);
-    // client = new W3CWebSocket(`ws://gartic.cloudflareworkers.com/api/room/${code}/websocket`);
-    // client = new W3CWebSocket(`ws://edge-chat-demo.cloudflareworkers.com/api/room/${code}/websocket`);
+    console.log('ENVIRONMENT', process.env.NEXT_PUBLIC_ENVIRONMENT);
+
+    if (process.env.NEXT_PUBLIC_ENVIRONMENT == 'development') {
+        client = new W3CWebSocket(`ws://127.0.0.1:8000/${code}`);
+    } else {
+        client = new W3CWebSocket(`ws://gartic.denniske.workers.dev/api/room/${code}/websocket`);
+    }
 
     client.onopen = () => {
         console.log('WebSocket Client Connected');
@@ -62,7 +66,7 @@ export function initConnection(_mutate: Mutate, code: string) {
         if (event.code === closeCodeKicked) {
             console.log('You were kicked.');
         } else {
-            console.log('Connection lost.');
+            console.log('Connection lost.', event);
         }
     };
 }
