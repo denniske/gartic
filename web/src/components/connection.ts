@@ -91,6 +91,18 @@ export function actionStart() {
     client.send(JSON.stringify({action: 'start'}));
 }
 
+export function actionReplay() {
+    client.send(JSON.stringify({action: 'replay'}));
+}
+
+export function actionReplayNextEntry() {
+    client.send(JSON.stringify({action: 'replayNextEntry'}));
+}
+
+export function actionReplayBook(index: number) {
+    client.send(JSON.stringify({action: 'replayBook', index }));
+}
+
 export function actionStory(text: string) {
     client.send(JSON.stringify({action: 'story', text}));
 }

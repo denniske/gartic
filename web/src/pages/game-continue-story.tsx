@@ -27,7 +27,7 @@ export default function GameContinueStory() {
     const [done, setDone] = useState(false);
 
     return (
-        <div className="p-4 flex md:flex-row flex-col max-w-7xl space-y-5">
+        <div className="p-4 flex flex-col max-w-7xl space-y-5">
 
             <div className="text-gray-100">
                 Continue the story!

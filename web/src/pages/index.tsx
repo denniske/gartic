@@ -20,6 +20,7 @@ import GameStartStory from "~/pages/game-start-story";
 import GameContinueStory from "~/pages/game-continue-story";
 import GameFinished from "~/pages/game-finished";
 import Landing from "~/pages/landing";
+import Replay from "~/pages/replay";
 
 
 export default function Home() {
@@ -41,13 +42,13 @@ export default function Home() {
 
     // if (!user?.name) {
     //     return (
-    //         <div className="p-4 flex md:flex-row flex-col max-w-7xl mx-auto space-y-5"/>
+    //         <div className="p-4 flex flex-col max-w-7xl mx-auto space-y-5"/>
     //     );
     // }
 
-    // <div className="bg-purple-800 p-4 flex md:flex-row flex-col min-h-screen max-w-7xl mx-auto space-y-3">
+    // <div className="bg-purple-800 p-4 flex flex-col min-h-screen max-w-7xl mx-auto space-y-3">
     return (
-        <div className="p-4 flex md:flex-row flex-col max-w-7xl mx-auto space-y-5">
+        <div className="p-4 flex flex-col max-w-xl mx-auto space-y-5">
 
             {
                 game.screen === '' && !user?.name &&
@@ -71,6 +72,11 @@ export default function Home() {
             {
                 game.screen === 'finished' &&
                 <GameFinished/>
+            }
+
+            {
+                game.screen === 'replay' &&
+                <Replay/>
             }
 
 

@@ -1,4 +1,5 @@
 import {Mutate} from "~/state/store";
+import {IStorybook} from "~/general.types";
 
 interface IPreviousStoryAction {
     action: 'previousStory';
@@ -23,7 +24,16 @@ interface IStartAction {
     action: 'start';
 }
 
-type Action = IStartAction | INextRoundAction | IPreviousStoryAction | IFinishedAction | IPlayersDoneAction;
+interface IReplayAction {
+    action: 'replay';
+}
+
+interface IStorybookAction {
+    action: 'storybook';
+    storybook: IStorybook;
+}
+
+type Action = IStartAction | INextRoundAction | IPreviousStoryAction | IFinishedAction | IPlayersDoneAction | IReplayAction | IStorybookAction;
 
 enum State {
     StartStory,
@@ -68,9 +78,24 @@ export class GameClient {
             return;
         }
 
+        if (action.action === 'replay') {
+            this.state = State.Finished;
+            this.mutate((state) => {
+                state.game.screen = 'replay';
+            });
+            return;
+        }
+
         if (action.action === 'playersDone') {
             this.mutate((state) => {
                 state.playersDone = action.count;
+            });
+            return;
+        }
+
+        if (action.action === 'storybook') {
+            this.mutate((state) => {
+                state.replay.storybook = action.storybook;
             });
             return;
         }

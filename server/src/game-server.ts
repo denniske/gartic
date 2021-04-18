@@ -4,6 +4,7 @@ interface IStoryEntry {
     userId: string;
     userName: string;
     text: string;
+    shown: boolean;
 }
 
 interface IStoryAction {
@@ -15,7 +16,20 @@ interface IStartAction {
     action: 'start';
 }
 
-type Action = IStoryAction | IStartAction;
+interface IReplayAction {
+    action: 'replay';
+}
+
+interface IReplayBookAction {
+    action: 'replayBook';
+    index: number;
+}
+
+interface IReplayNextEntryAction {
+    action: 'replayNextEntry';
+}
+
+type Action = IStoryAction | IStartAction | IReplayAction | IReplayBookAction | IReplayNextEntryAction;
 
 enum State {
     StartStory = 'START_STORY',
@@ -25,6 +39,25 @@ enum State {
 
 function selectRandomElement<T>(items: T[]): T {
     return items[Math.floor(Math.random() * items.length)];
+}
+
+const dummyNames = ['Dennis', 'John'];
+
+function createDummyStory(sessionId: string, index: number): IStoryEntry[] {
+    return [
+        {
+            userId: sessionId,
+            userName: dummyNames[index],
+            text: dummyNames[index]+'0',
+            shown: true,
+        },
+        {
+            userId: sessionId,
+            userName: dummyNames[(index+1)%2],
+            text: dummyNames[(index+1)%2]+'1',
+            shown: false,
+        },
+    ];
 }
 
 export default class GameServer {
@@ -40,6 +73,52 @@ export default class GameServer {
 
     constructor(private chatRoom: ChatRoom) { }
 
+    sendStorybook(index: number) {
+        const books = Array.from(this.userStories.entries());
+        const [userId, entries] = books[index];
+
+        const entriesToSend = [];
+        for (const entry of entries) {
+            if (entry.shown) {
+                entriesToSend.push(entry);
+            } else {
+                entriesToSend.push(entry);
+                break;
+            }
+        }
+
+        console.log(userId);
+        console.log(this.sessions);
+
+        this.chatRoom.broadcast({
+            action: 'storybook',
+            storybook: {
+                index,
+                last: index == books.length-1,
+                entries: entriesToSend,
+                user: {
+                    id: userId,
+                    name: this.sessions.find(s => s.id === userId)!.name,
+                },
+            }
+        });
+    }
+
+    markLastStorybookEntryAsShown() {
+        const books = Array.from(this.userStories.entries());
+        const index = books.findIndex(book => book[1].find(e => !e.shown));
+        const [userId, entries] = books[index];
+
+        for (const entry of entries) {
+            if (!entry.shown) {
+                entry.shown = true;
+                break;
+            }
+        }
+
+        return index;
+    }
+
     processAction(session: ISession, action: Action) {
         console.log();
         console.log('STATE', this.state);
@@ -49,9 +128,38 @@ export default class GameServer {
             this.state = State.StartStory;
             this.storyLength = 0;
             this.userStories.clear();
+
+            // Fake data
+            // this.state = State.ContinueStory;
+            // this.storyLength = 2;
+            // this.userStories.set(this.sessions[0].id!, createDummyStory(this.sessions[0].id!, 0));
+            // this.userStories.set(this.sessions[1].id!, createDummyStory(this.sessions[1].id!, 1));
+
             this.userInputs.clear();
             this.userTargets.clear();
             this.chatRoom.broadcast({ action: 'start' });
+            return;
+        }
+        if (action.action === 'replay') {
+            // Fake data
+            // this.state = State.Finished;
+            // this.storyLength = 2;
+            // this.userStories.clear();
+            // this.userStories.set(this.sessions[0].id!, createDummyStory(this.sessions[0].id!, 0));
+            // this.userStories.set(this.sessions[1].id!, createDummyStory(this.sessions[1].id!, 1));
+
+            this.chatRoom.broadcast({ action: 'replay' });
+            this.sendStorybook(0);
+
+            return;
+        }
+        if (action.action === 'replayNextEntry') {
+            const index = this.markLastStorybookEntryAsShown();
+            this.sendStorybook(index);
+            return;
+        }
+        if (action.action === 'replayBook') {
+            this.sendStorybook(action.index);
             return;
         }
         if (action.action === 'story') {
@@ -71,6 +179,7 @@ export default class GameServer {
                                 userId: key,
                                 userName: this.sessions.find(s => s.id == key)!.name!,
                                 text: value,
+                                shown: true,
                             }]);
                         }
                         this.state = State.ContinueStory;
@@ -84,6 +193,7 @@ export default class GameServer {
                                 userId: key,
                                 userName: this.sessions.find(s => s.id == key)!.name!,
                                 text: value,
+                                shown: false,
                             });
                         }
                         this.userInputs.clear();

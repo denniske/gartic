@@ -1,5 +1,11 @@
-import {IConfig, IPlayer} from "~/general.types";
+import {IConfig, IPlayer, IStorybook} from "~/general.types";
 
+
+export function returnToLobby() {
+    return (state: AppState) => {
+        state.game.screen = '';
+    };
+}
 
 export function connected() {
     return (state: AppState) => {
@@ -52,6 +58,10 @@ export interface GameState {
     round?: number;
 }
 
+export interface ReplayState {
+    storybook?: IStorybook;
+}
+
 export interface AppState {
     game: GameState;
     connected: boolean;
@@ -60,6 +70,7 @@ export interface AppState {
     config: IConfig;
     players: IPlayer[];
     playersDone: number;
+    replay: ReplayState;
     lastUpdate: number;
     light: boolean;
     count: number;
@@ -68,6 +79,9 @@ export interface AppState {
 export const initialState: AppState = {
     game: {
         screen: '',
+    },
+    replay: {
+        storybook: undefined,
     },
     connected: false,
     code: undefined,

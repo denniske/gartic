@@ -14,23 +14,35 @@ import {useMutate, useSelector} from "~/state/store";
 import {useDispatch} from "react-redux";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
-import {actionStory, join, actionStart} from "~/components/connection";
+import {actionStory, join, actionStart, actionReplay} from "~/components/connection";
 
 
 export default function GameFinished() {
     const user = useSelector(state => state.user);
-    const [text, setText] = useState(user.name + '0');
-    const [done, setDone] = useState(false);
-    const playersDone = useSelector((state) => state.playersDone);
-    const players = useSelector((state) => state.players);
+    const config = useSelector(state => state.config);
+    const userIsAdmin = user.id === config.adminSessionId;
 
     return (
-        <div className="p-4 flex md:flex-row flex-col max-w-7xl space-y-5">
+        <div className="p-4 flex flex-col max-w-7xl space-y-5">
 
             <div className="text-gray-100">
                 The stories are finished!
             </div>
 
+            {
+                userIsAdmin &&
+                <div className="flex flex-row justify-end space-x-4">
+                    <button
+                        onClick={() => actionReplay()}
+                        className="inline-flex justify-center items-center py-2 px-4 border border-transparent button-shadow text-sm font-medium rounded-md text-white bg-white hover:bg-gray-300"
+                    >
+                        <FontAwesomeIcon className="text-green-500 text-shadow" icon={faPlay}/>
+                        <span className="px-4 font-bold uppercase text-purple-900">
+                            Show stories
+                        </span>
+                    </button>
+                </div>
+            }
         </div>
     );
 }
