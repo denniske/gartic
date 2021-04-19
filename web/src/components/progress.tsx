@@ -14,7 +14,7 @@ import {useMutate, useSelector} from "~/state/store";
 import {useDispatch} from "react-redux";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
-import {actionStory, join, actionStart, initConnection} from "~/components/connection";
+import {actionStory, lobbyJoin, actionStart, initConnection} from "~/components/connection";
 import {speak} from "~/components/speech";
 
 interface Props {

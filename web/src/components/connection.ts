@@ -10,15 +10,15 @@ import {
     updateConfig,
     updateUser
 } from "~/state/action";
-import {GameClient} from "~/components/game-client";
+import {GameClient} from "~/client/game-client";
+import {LobbyClient} from "~/client/lobby-client";
 
 
 let client = null;
 let mutate = null;
 
-const closeReasonKicked = 'REASON_KICKED';
-
 let gameClient: GameClient;
+let lobbyClient: LobbyClient;
 
 const getUniqueID = () => {
     const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
@@ -30,6 +30,7 @@ export function initConnection(_mutate: Mutate, code: string): Promise<void> {
         mutate = _mutate;
 
         gameClient = new GameClient(mutate);
+        lobbyClient = new LobbyClient(mutate);
 
         console.log('ENVIRONMENT', process.env.NEXT_PUBLIC_ENVIRONMENT);
 
@@ -49,43 +50,50 @@ export function initConnection(_mutate: Mutate, code: string): Promise<void> {
             const message = JSON.parse(messageEvent.data as string);
             console.log(message);
 
-            if (message.action) {
-                gameClient.processActionFromServer(message);
-            }
-            if (message.joined) {
-                mutate(addPlayer({id: message.joined.id, name: message.joined.name}));
-            }
-            if (message.config) {
-                mutate(updateConfig(message.config));
-            }
-            if (message.quit) {
-                mutate(removePlayerById(message.quit));
-            }
+            lobbyClient.message(message);
+            gameClient.message(message);
+
+            // if (message.action) {
+            //     gameClient.message(message);
+            // }
+            // if (message.joined) {
+            //     mutate(addPlayer({id: message.joined.id, name: message.joined.name}));
+            // }
+            // if (message.config) {
+            //     mutate(updateConfig(message.config));
+            // }
+            // if (message.quit) {
+            //     mutate(removePlayerById(message.quit));
+            // }
         };
 
         client.onclose = (event: ICloseEvent) => {
             mutate(disconnected());
-            if (event.reason === closeReasonKicked) {
-                console.log('You were kicked.');
-                mutate(updateUser({id: undefined, name: undefined}));
-            } else {
-                console.log('Connection lost.', event);
-            }
+
+            lobbyClient.close(event.reason);
+
+            // if (event.reason === closeReasonKicked) {
+            //     console.log('You were kicked.');
+            //     mutate(updateUser({id: undefined, name: undefined}));
+            // } else {
+            //     console.log('Connection lost.', event);
+            // }
         };
     });
 }
 
 
-export function join(name: string) {
-    const user = {id: getUniqueID(), name};
+export function lobbyJoin(name: string) {
+    const user = {id: getUniqueID()};
     mutate(updateUser(user));
     mutate(clearPlayers());
-    client.send(JSON.stringify(user));
+    client.send(JSON.stringify({ action: 'lobby-join', id: user.id, name: name }));
 }
 
-export function kick(playerId: string) {
-    client.send(JSON.stringify({kick: playerId}));
+export function lobbyKick(playerId: string) {
+    client.send(JSON.stringify({action: 'lobby-kick', id: playerId}));
 }
+
 
 export function actionStart() {
     client.send(JSON.stringify({action: 'start'}));

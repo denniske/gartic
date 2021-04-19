@@ -1,4 +1,4 @@
-import {ChatRoom, ISession} from "./chat-room";
+import {ChatRoom, ISession} from "../chat-room";
 
 interface IStoryEntry {
     userId: string;
@@ -102,7 +102,7 @@ export default class GameServer {
                 entries: entriesToSend,
                 user: {
                     id: userId,
-                    name: this.sessions.find(s => s.id === userId)!.name,
+                    name: 'SomeUser', // this.sessions.find(s => s.id === userId)!.name,
                 },
             }
         });
@@ -123,7 +123,11 @@ export default class GameServer {
         return index;
     }
 
-    processAction(session: ISession, action: Action) {
+    close(sessionId: string) {
+
+    }
+
+    message(sessionId: string, action: Action) {
         console.log();
         console.log('STATE', this.state);
         console.log('STORY LENGTH', this.storyLength);
@@ -171,7 +175,7 @@ export default class GameServer {
             return;
         }
         if (action.action === 'story') {
-            this.userInputs.set(session.id!, action.text);
+            this.userInputs.set(sessionId, action.text);
 
             this.chatRoom.broadcast({ action: 'playersDone', count: this.userInputs.size });
 
@@ -185,7 +189,7 @@ export default class GameServer {
                         for (const [key, value] of this.userInputs.entries()) {
                             this.userStories.set(key, [{
                                 userId: key,
-                                userName: this.sessions.find(s => s.id == key)!.name!,
+                                userName: 'SomeUser', // this.sessions.find(s => s.id == key)!.name!,
                                 text: value,
                                 shown: true,
                             }]);
@@ -199,7 +203,7 @@ export default class GameServer {
                             const targetId = this.userTargets.get(key)!;
                             this.userStories.get(targetId)!.push({
                                 userId: key,
-                                userName: this.sessions.find(s => s.id == key)!.name!,
+                                userName: 'SomeUser', // this.sessions.find(s => s.id == key)!.name!,
                                 text: value,
                                 shown: false,
                             });
@@ -247,6 +251,5 @@ export default class GameServer {
             return;
         }
     }
-
 }
 

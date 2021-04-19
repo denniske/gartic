@@ -53,7 +53,7 @@ export class GameClient {
 
     constructor(private mutate: Mutate) { }
 
-    processActionFromServer(action: Action) {
+    message(action: Action) {
         if (action.action === 'start') {
             this.mutate((state) => {
                 state.game.screen = 'startStory';

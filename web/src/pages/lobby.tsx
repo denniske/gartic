@@ -14,7 +14,7 @@ import {useMutate, useSelector} from "~/state/store";
 import {useDispatch} from "react-redux";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
-import {join, actionStart, quit} from "~/components/connection";
+import {lobbyJoin, actionStart, quit} from "~/components/connection";
 import {copyTextToClipboard} from "~/components/clipboard";
 import Progress from "~/components/progress";
 
@@ -28,7 +28,6 @@ export default function Lobby() {
     const [copiedLinkTimer, setCopiedLinkTimer] = useState<number>();
     const config = useSelector(state => state.config);
     const user = useSelector(state => state.user);
-    const userIsAdmin = user.id === config.adminSessionId;
 
     const playerList = Array.from({length: 10}, (_, i) => players.length > i ? players[i] : null);
 
@@ -97,7 +96,7 @@ export default function Lobby() {
             </div>
 
             {
-                userIsAdmin &&
+                user.admin &&
                 <div className="flex flex-row justify-center items-start space-x-4">
                     <div className="">
                         <button

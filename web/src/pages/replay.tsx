@@ -16,7 +16,7 @@ import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
 import {
     actionStory,
-    join,
+    lobbyJoin,
     actionStart,
     actionReplayNextEntry,
     actionReplayBook,
@@ -30,7 +30,6 @@ export default function Replay() {
     const user = useSelector(state => state.user);
     const config = useSelector(state => state.config);
     const storybook = useSelector(state => state.replay.storybook);
-    const userIsAdmin = user.id === config.adminSessionId;
 
     if (!storybook) {
         return <div/>;
@@ -57,7 +56,7 @@ export default function Replay() {
                                 <span>{entry.text}</span>
                             }
                             {
-                                !entry.shown && userIsAdmin &&
+                                !entry.shown && user.admin &&
                                 <button
                                     onClick={() => actionReplayNextEntry()}
                                     className="inline-flex justify-center items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-white hover:bg-gray-100"
@@ -68,7 +67,7 @@ export default function Replay() {
                                 </button>
                             }
                             {
-                                !entry.shown && !userIsAdmin &&
+                                !entry.shown && !user.admin &&
                                 <span>???</span>
                             }
                         </div>
@@ -77,7 +76,7 @@ export default function Replay() {
             }
 
             {
-                userIsAdmin && storybookComplete && !storybook.last &&
+                user.admin && storybookComplete && !storybook.last &&
                 <div className="flex flex-row justify-end space-x-4">
                     <button
                         onClick={() => actionReplayBook(storybook.index+1)}
@@ -91,7 +90,7 @@ export default function Replay() {
                 </div>
             }
             {
-                userIsAdmin && storybookComplete && storybook.last &&
+                user.admin && storybookComplete && storybook.last &&
                 <div className="flex flex-row justify-end space-x-4">
                     <button
                         onClick={() => actionRestart()}

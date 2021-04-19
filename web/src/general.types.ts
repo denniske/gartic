@@ -8,6 +8,7 @@ export interface IConfig {
 export interface IPlayer {
     id?: string;
     name?: string;
+    admin?: boolean;
 }
 
 export interface IStorybook {

@@ -14,13 +14,12 @@ import {useMutate, useSelector} from "~/state/store";
 import {useDispatch} from "react-redux";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
-import {actionStory, join, actionStart, actionReplay} from "~/components/connection";
+import {actionStory, lobbyJoin, actionStart, actionReplay} from "~/components/connection";
 
 
 export default function GameFinished() {
     const user = useSelector(state => state.user);
     const config = useSelector(state => state.config);
-    const userIsAdmin = user.id === config.adminSessionId;
 
     return (
         <div className="p-4 flex flex-col max-w-7xl space-y-5">
@@ -30,7 +29,7 @@ export default function GameFinished() {
             </div>
 
             {
-                userIsAdmin &&
+                user.admin &&
                 <div className="flex flex-row justify-end space-x-4">
                     <button
                         onClick={() => actionReplay()}

@@ -37,6 +37,13 @@ export function addPlayer(player: IPlayer) {
     };
 }
 
+export function updatePlayer(player: IPlayer) {
+    return (state: AppState) => {
+        const existingPlayer = state.players.find(p => p.id == player.id);
+        Object.assign(existingPlayer, player);
+    };
+}
+
 export function removePlayerById(playerId: string) {
     return (state: AppState) => {
         state.players = state.players.filter(p => p.id != playerId);

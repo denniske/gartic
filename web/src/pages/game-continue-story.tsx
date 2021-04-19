@@ -14,7 +14,7 @@ import {useMutate, useSelector} from "~/state/store";
 import {useDispatch} from "react-redux";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
-import {actionStory, join, actionStart} from "~/components/connection";
+import {actionStory, lobbyJoin, actionStart} from "~/components/connection";
 import {useInterval} from "~/hooks/use-interval";
 import {roundTime} from "~/general.types";
 import Progress from "~/components/progress";

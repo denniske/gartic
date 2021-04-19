@@ -14,7 +14,7 @@ import {useMutate, useSelector} from "~/state/store";
 import {useDispatch} from "react-redux";
 import {useRouter} from "next/router";
 import {useEffect} from "react";
-import {join} from "~/components/connection";
+import {lobbyJoin} from "~/components/connection";
 import Lobby from "~/pages/lobby";
 import GameStartStory from "~/pages/game-start-story";
 import GameContinueStory from "~/pages/game-continue-story";

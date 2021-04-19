@@ -11,7 +11,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faCrown, faTimes} from "@fortawesome/free-solid-svg-icons";
 import {IPlayer} from "~/general.types";
 import {useSelector} from "~/state/store";
-import {kick} from "~/components/connection";
+import {lobbyKick} from "~/components/connection";
 
 
 interface Props {
@@ -40,9 +40,6 @@ export function Card(props: Props) {
         );
     }
 
-    const playerIsAdmin = player.id === config.adminSessionId;
-    const userIsAdmin = user.id === config.adminSessionId;
-
     return (
         <div
             className="rounded-l-[35px] rounded-r-xl bg-gray-300 border-2 border-gray-300 flex items-center px-3 py-2 space-x-4">
@@ -53,15 +50,15 @@ export function Card(props: Props) {
                 {player?.name ?? 'EMPTY'}
             </div>
             {
-                userIsAdmin && !playerIsAdmin &&
+                user.admin && !player.admin &&
                 <div
-                    onClick={() => kick(player.id)}
+                    onClick={() => lobbyKick(player.id)}
                     className="cursor-pointer border-2 border-purple-800 rounded-full h-8 w-8 flex items-center justify-center hover:bg-purple-800 text-purple-800 hover:text-gray-300">
                     <FontAwesomeIcon icon={faTimes}/>
                 </div>
             }
             {
-                playerIsAdmin &&
+                player.admin &&
                 <div className="bg-purple-800 rounded-full h-8 w-8 flex items-center justify-center text-gray-300">
                     <FontAwesomeIcon icon={faCrown}/>
                 </div>

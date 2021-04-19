@@ -2,6 +2,7 @@ import { orderBy } from "lodash";
 import {connection, server} from "websocket";
 import {ChatRoom} from "./chat-room";
 import {WebSocketLike} from "./types";
+import {getUniqueID} from "./util";
 
 const webSocketsServerPort = 8000;
 // const webSocketServer = require('websocket').server;
@@ -76,13 +77,6 @@ const env = {};
 
 console.log('Started');
 
-// This code generates unique userid for everyuser.
-const getUniqueID = () => {
-    const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-    return s4() + s4() + '-' + s4();
-};
-
-
 class WebsocketMock implements WebSocketLike {
     constructor(private connection: connection) {}
 
@@ -116,7 +110,7 @@ wsServer.on('request', function(request) {
 
     const code = request.httpRequest.url?.replace('/', '')!;
 
-    var userID = getUniqueID();
+    const userID = getUniqueID();
     console.log((new Date()) + ' Recieved a new connection from origin ' + request.origin + '.');
     // You can rewrite this part of the code to accept only the requests from allowed origin
     const connection = request.accept(undefined, request.origin);
