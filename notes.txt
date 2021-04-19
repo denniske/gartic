@@ -1,5 +1,7 @@
 
-- timer
+https://css-tricks.com/building-progress-ring-quickly/
+
+x timer
 
 - game server: use array instead map
 - game server: move websocket out
