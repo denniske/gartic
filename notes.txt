@@ -1,0 +1,6 @@
+
+- timer
+
+- game server: use array instead map
+- game server: move websocket out
+- game server: test

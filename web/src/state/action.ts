@@ -53,6 +53,7 @@ export function clearPlayers() {
 export interface GameState {
     screen: string;
     previousStoryText?: string;
+    roundStartTime?: Date;
 
     // Debug
     round?: number;

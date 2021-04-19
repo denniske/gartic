@@ -16,6 +16,7 @@ import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
 import {join, actionStart, quit} from "~/components/connection";
 import {copyTextToClipboard} from "~/components/clipboard";
+import Progress from "~/components/progress";
 
 
 export default function Lobby() {

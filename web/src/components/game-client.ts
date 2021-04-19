@@ -1,5 +1,6 @@
 import {Mutate} from "~/state/store";
 import {IStorybook} from "~/general.types";
+import {returnToLobby} from "~/state/action";
 
 interface IPreviousStoryAction {
     action: 'previousStory';
@@ -9,6 +10,7 @@ interface IPreviousStoryAction {
 interface INextRoundAction {
     action: 'nextRound';
     round: number;
+    time: string;
 }
 
 interface IFinishedAction {
@@ -22,6 +24,7 @@ interface IPlayersDoneAction {
 
 interface IStartAction {
     action: 'start';
+    time: string;
 }
 
 interface IReplayAction {
@@ -33,7 +36,11 @@ interface IStorybookAction {
     storybook: IStorybook;
 }
 
-type Action = IStartAction | INextRoundAction | IPreviousStoryAction | IFinishedAction | IPlayersDoneAction | IReplayAction | IStorybookAction;
+interface IRestartAction {
+    action: 'restart';
+}
+
+type Action = IStartAction | INextRoundAction | IPreviousStoryAction | IFinishedAction | IPlayersDoneAction | IReplayAction | IStorybookAction | IRestartAction;
 
 enum State {
     StartStory,
@@ -50,6 +57,7 @@ export class GameClient {
         if (action.action === 'start') {
             this.mutate((state) => {
                 state.game.screen = 'startStory';
+                state.game.roundStartTime = new Date(action.time);
             });
             return;
         }
@@ -59,6 +67,7 @@ export class GameClient {
             this.mutate((state) => {
                 state.game.screen = 'continueStory';
                 state.game.round = action.round;
+                state.game.roundStartTime = new Date(action.time);
             });
             return;
         }
@@ -83,6 +92,11 @@ export class GameClient {
             this.mutate((state) => {
                 state.game.screen = 'replay';
             });
+            return;
+        }
+
+        if (action.action === 'restart') {
+            this.mutate(returnToLobby());
             return;
         }
 

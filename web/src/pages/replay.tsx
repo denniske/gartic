@@ -14,32 +14,39 @@ import {useMutate, useSelector} from "~/state/store";
 import {useDispatch} from "react-redux";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
-import {actionStory, join, actionStart, actionReplayNextEntry, actionReplayBook} from "~/components/connection";
+import {
+    actionStory,
+    join,
+    actionStart,
+    actionReplayNextEntry,
+    actionReplayBook,
+    actionRestart
+} from "~/components/connection";
 import {returnToLobby} from "~/state/action";
 
 
 export default function Replay() {
     const mutate = useMutate();
     const user = useSelector(state => state.user);
-    const playersDone = useSelector((state) => state.playersDone);
-    const players = useSelector((state) => state.players);
-    const game = useSelector((state) => state.game);
     const config = useSelector(state => state.config);
     const storybook = useSelector(state => state.replay.storybook);
     const userIsAdmin = user.id === config.adminSessionId;
 
-    const [text, setText] = useState(user.name + game.round);
-    const [done, setDone] = useState(false);
+    if (!storybook) {
+        return <div/>;
+    }
+
+    const storybookComplete = storybook.entries.every(e => e.shown);
 
     return (
         <div className="p-4 flex flex-col max-w-7xl space-y-5">
 
             <div className="text-gray-100">
-                Storybook for {storybook?.user.name}
+                Storybook for {storybook.user.name}
             </div>
 
             {
-                storybook?.entries?.map((entry, i) => (
+                storybook.entries.map((entry, i) => (
                     <div className="mt-1" key={i}>
                         <div className="text-gray-300">
                             {entry.userName}
@@ -70,7 +77,7 @@ export default function Replay() {
             }
 
             {
-                userIsAdmin && !storybook?.last &&
+                userIsAdmin && storybookComplete && !storybook.last &&
                 <div className="flex flex-row justify-end space-x-4">
                     <button
                         onClick={() => actionReplayBook(storybook.index+1)}
@@ -84,10 +91,11 @@ export default function Replay() {
                 </div>
             }
             {
-                userIsAdmin && storybook?.last &&
+                userIsAdmin && storybookComplete && storybook.last &&
                 <div className="flex flex-row justify-end space-x-4">
                     <button
-                        onClick={() => mutate(returnToLobby())}
+                        onClick={() => actionRestart()}
+                        // onClick={() => mutate(returnToLobby())}
                         className="inline-flex justify-center items-center py-2 px-4 border border-transparent button-shadow text-sm font-medium rounded-md text-white bg-white hover:bg-gray-300"
                     >
                         <FontAwesomeIcon className="text-green-500 text-shadow" icon={faPlay}/>

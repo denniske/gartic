@@ -15,6 +15,9 @@ import {useDispatch} from "react-redux";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
 import {actionStory, join, actionStart} from "~/components/connection";
+import Progress from "~/components/progress";
+import {useInterval} from "~/hooks/use-interval";
+import {roundTime} from "~/general.types";
 
 
 export default function GameStartStory() {
@@ -23,16 +26,23 @@ export default function GameStartStory() {
     const [done, setDone] = useState(false);
     const playersDone = useSelector((state) => state.playersDone);
     const players = useSelector((state) => state.players);
+    const game = useSelector((state) => state.game);
+    const [progress, setProgress] = useState(0);
+
+    useInterval(() => {
+        const elapsed = (new Date().getTime() - game.roundStartTime.getTime())/1000;
+        setProgress(elapsed / roundTime * 100);
+    }, 100);
 
     return (
         <div className="p-4 flex flex-col max-w-7xl space-y-5">
 
-            <div className="text-gray-100">
-                Start your story!
-            </div>
-
-            <div className="text-gray-100">
-                {playersDone} / {players.length}
+            <div className="flex flex-row items-center">
+                <div className="text-gray-100">
+                    Start your story!
+                </div>
+                <div className="flex-1"/>
+                <Progress progress={progress} size={60}/>
             </div>
 
             <div className="mt-1">
@@ -49,7 +59,13 @@ export default function GameStartStory() {
                       />
             </div>
 
-            <div className="flex flex-row justify-end space-x-4">
+            <div className="flex flex-row justify-end items-center space-x-4">
+                <div className="text-gray-100 justify-self-start">
+                    {playersDone} / {players.length} players are done.
+                </div>
+
+                <div className="flex-1"/>
+
                 {
                     !done &&
                     <button

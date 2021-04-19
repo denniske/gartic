@@ -20,6 +20,10 @@ interface IReplayAction {
     action: 'replay';
 }
 
+interface IRestartAction {
+    action: 'restart';
+}
+
 interface IReplayBookAction {
     action: 'replayBook';
     index: number;
@@ -29,7 +33,7 @@ interface IReplayNextEntryAction {
     action: 'replayNextEntry';
 }
 
-type Action = IStoryAction | IStartAction | IReplayAction | IReplayBookAction | IReplayNextEntryAction;
+type Action = IStoryAction | IStartAction | IReplayAction | IReplayBookAction | IReplayNextEntryAction | IRestartAction;
 
 enum State {
     StartStory = 'START_STORY',
@@ -137,7 +141,11 @@ export default class GameServer {
 
             this.userInputs.clear();
             this.userTargets.clear();
-            this.chatRoom.broadcast({ action: 'start' });
+            this.chatRoom.broadcast({ action: 'start', time: new Date() });
+            return;
+        }
+        if (action.action === 'restart') {
+            this.chatRoom.broadcast({ action: 'restart' });
             return;
         }
         if (action.action === 'replay') {
@@ -206,7 +214,7 @@ export default class GameServer {
 
                 // Distribute stories randomly
                 if (this.storyLength < this.sessions.length) {
-                    this.chatRoom.broadcast({ action: 'nextRound', round: this.storyLength });
+                    this.chatRoom.broadcast({ action: 'nextRound', round: this.storyLength, time: new Date() });
                     this.chatRoom.broadcast({ action: 'playersDone', count: 0 });
 
                     this.userTargets.clear();

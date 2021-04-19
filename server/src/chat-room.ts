@@ -149,6 +149,7 @@ export class ChatRoom implements DurableObject {
 
         // I guess we'll use JSON.
 
+        console.log();
         console.log('parse', msg);
 
         let data = JSON.parse(msg.data);

@@ -103,6 +103,10 @@ export function actionReplayBook(index: number) {
     client.send(JSON.stringify({action: 'replayBook', index }));
 }
 
+export function actionRestart() {
+    client.send(JSON.stringify({action: 'restart' }));
+}
+
 export function actionStory(text: string) {
     client.send(JSON.stringify({action: 'story', text}));
 }

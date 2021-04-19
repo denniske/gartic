@@ -1,4 +1,6 @@
 
+export const roundTime = 60;
+
 export interface IConfig {
     adminSessionId?: string;
 }

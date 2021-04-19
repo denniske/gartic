@@ -15,6 +15,7 @@ import {useDispatch} from "react-redux";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
 import {actionStory, join, actionStart, initConnection} from "~/components/connection";
+import {speak} from "~/components/speech";
 
 
 export default function Landing() {
@@ -26,8 +27,12 @@ export default function Landing() {
     const mutate = useMutate();
 
     useEffect(() => {
-        setPlaceholderName(`CoolName${Math.floor(Math.random() * 9999)}`);
-    }, []);
+        if (router.query?.name) {
+            setPlaceholderName(router.query?.name as string);
+        } else {
+            setPlaceholderName(`CoolName${Math.floor(Math.random() * 9999)}`);
+        }
+    }, [router.query]);
 
     // useEffect(() => {
     //     if (connected) {
@@ -44,6 +49,7 @@ export default function Landing() {
         });
         await initConnection(mutate, gameCode);
         join(name || placeholderName);
+        // speak(name || placeholderName);
     };
 
     return (
