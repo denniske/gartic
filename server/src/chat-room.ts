@@ -14,6 +14,7 @@ export interface ISession {
     id: string;
     quit?: boolean;
     webSocket: WebSocketLike;
+    idleTimeout?: NodeJS.Timeout;
 }
 
 export interface IChatRoom {
@@ -22,11 +23,13 @@ export interface IChatRoom {
     close(sessionId: string, code: number, reason: string): void;
 }
 
+const closeReasonIdle = 'REASON_IDLE';
+
 export class ChatRoom implements DurableObject, IChatRoom {
     storage: DurableObjectStorage;
     env: any;
     sessions: ISession[];
-    lastTimestamp: number;
+    lastMessageReceived?: Date;
 
     gameServer: GameServer;
     lobbyServer: LobbyServer;
@@ -40,12 +43,6 @@ export class ChatRoom implements DurableObject, IChatRoom {
         this.env = env;
 
         this.sessions = [];
-
-        // We keep track of the last-seen message's timestamp just so that we can assign monotonically
-        // increasing timestamps even if multiple messages arrive simultaneously (see below). There's
-        // no need to store this to disk since we assume if the object is destroyed and recreated, much
-        // more than a millisecond will have gone by.
-        this.lastTimestamp = 0;
 
         this.lobbyServer = new LobbyServer(this);
         this.gameServer = new GameServer(this, this.lobbyServer);
@@ -90,6 +87,13 @@ export class ChatRoom implements DurableObject, IChatRoom {
         });
     }
 
+    exit() {
+        // 10 minutes
+        if ((new Date().getTime() - this.lastMessageReceived!.getTime()) / 1000 > 10 * 60 * 1000) {
+            this.sessions.forEach(session => session.webSocket.close(1000, closeReasonIdle));
+        }
+    }
+
     // handleSession() implements our WebSocket-based chat protocol.
     async handleSession(webSocket: WebSocketLike, ip: any) {
         // Accept our end of the WebSocket. This tells the runtime that we'll be terminating the
@@ -132,6 +136,8 @@ export class ChatRoom implements DurableObject, IChatRoom {
 
         this.lobbyServer.open(session.id);
 
+        setInterval(() => this.exit(), 1000);
+
         webSocket.addEventListener("message", async msg => {
             try {
                 if (session.quit) {
@@ -152,6 +158,8 @@ export class ChatRoom implements DurableObject, IChatRoom {
                     return;
                 }
 
+                this.lastMessageReceived = new Date();
+
                 console.log();
                 console.log('parse', msg);
 
@@ -159,10 +167,6 @@ export class ChatRoom implements DurableObject, IChatRoom {
 
                 this.lobbyServer.message(session.id, data);
                 this.gameServer.message(session.id, data);
-
-                // if (data.action) {
-                //     this.gameServer.processAction(session, data);
-                // }
 
                 // if (data.message) {
                 //   // Construct sanitized message for storage and broadcast.
@@ -189,7 +193,6 @@ export class ChatRoom implements DurableObject, IChatRoom {
                 //   let key = 'message:' + new Date(data.timestamp).toISOString();
                 //   await this.storage.put(key, dataStr);
                 // }
-
             } catch (err) {
                 // Report any exceptions directly back to the client. As with our handleErrors() this
                 // probably isn't what you'd want to do in production, but it's convenient when testing.

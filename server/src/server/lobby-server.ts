@@ -31,8 +31,6 @@ export default class LobbyServer {
     created: Date | null;
     members: IMember[];
 
-    // adminUserId?: string;
-
     constructor(private chatRoom: IChatRoom) {
         this.created = null;
         this.members = [];
@@ -40,9 +38,6 @@ export default class LobbyServer {
 
     open(sessionId: string) {
         this.created = this.created ?? new Date();
-        // this.members.push({
-        //     sessionId,
-        // });
     }
 
     close(sessionId: string) {
@@ -85,29 +80,6 @@ export default class LobbyServer {
 
             this.members.push(member);
 
-            // Deliver member list
-            // session.blockedMessages?.forEach(queued => {
-            //     webSocket.send(queued);
-            // });
-            // delete session.blockedMessages;
-
-            // if (this.adminUserId == null) {
-            //     this.adminUserId = member.id;
-            //     this.chatRoom.broadcast({
-            //         action: 'lobby-config',
-            //         config: {
-            //             adminSessionId: this.adminUserId,
-            //         },
-            //     });
-            // } else {
-            //     this.chatRoom.send(sessionId, {
-            //         action: 'lobby-config',
-            //         config: {
-            //             adminSessionId: this.adminUserId,
-            //         },
-            //     });
-            // }
-
             if (this.members.filter(m => m.admin).length === 0) {
                 member.admin = true;
             }
@@ -125,11 +97,6 @@ export default class LobbyServer {
                 action: 'lobby-member-join',
                 member: {id: member.id, name: member.name, admin: member.admin},
             });
-
-            // this.chatRoom.send(sessionId, {
-            //     action: 'lobby-ready',
-            //     ready: true
-            // });
         }
         if (action.action == 'lobby-kick') {
             const member = this.members.find(m => m.id == action.id);
@@ -149,21 +116,6 @@ export default class LobbyServer {
             action: 'lobby-member-update',
             member: {id: this.members[0].id, name: this.members[0].name, admin: this.members[0].admin},
         });
-
-        // if (!this.members.some(s => s.admin)) {
-        //     if (this.members.length == 0) {
-        //         this.adminUserId = undefined;
-        //         return;
-        //     }
-        //     this.adminUserId = this.members[0].id;
-        //
-        //     this.chatRoom.broadcast({
-        //         action: 'lobby-config',
-        //         config: {
-        //             adminSessionId: this.adminUserId,
-        //         },
-        //     });
-        // }
     }
 }
 
