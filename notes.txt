@@ -3,6 +3,8 @@ https://css-tricks.com/building-progress-ring-quickly/
 
 x timer
 
-- game server: use array instead map
-- game server: move websocket out
-- game server: test
+x game server: use array instead map
+x game server: move websocket out
+x game server: test
+
+- edit / done -> edit should decrement done players

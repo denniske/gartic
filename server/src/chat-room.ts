@@ -47,8 +47,8 @@ export class ChatRoom implements DurableObject, IChatRoom {
         // more than a millisecond will have gone by.
         this.lastTimestamp = 0;
 
-        this.gameServer = new GameServer(this);
         this.lobbyServer = new LobbyServer(this);
+        this.gameServer = new GameServer(this, this.lobbyServer);
     }
 
     // The system will call fetch() whenever an HTTP request is sent to this Object. Such requests
@@ -193,6 +193,7 @@ export class ChatRoom implements DurableObject, IChatRoom {
             } catch (err) {
                 // Report any exceptions directly back to the client. As with our handleErrors() this
                 // probably isn't what you'd want to do in production, but it's convenient when testing.
+                console.error(session.id, err);
                 webSocket.send(JSON.stringify({error: err.stack}));
             }
         });
@@ -220,6 +221,8 @@ export class ChatRoom implements DurableObject, IChatRoom {
             message = JSON.stringify(message);
         }
 
+        console.log('send', sessionId, message);
+
         session.webSocket.send(message);
     }
 
@@ -227,6 +230,8 @@ export class ChatRoom implements DurableObject, IChatRoom {
         if (typeof message !== "string") {
             message = JSON.stringify(message);
         }
+
+        console.log('broadcast', message);
 
         // Iterate over all the sessions sending them messages.
         let quitters: ISession[] = [];

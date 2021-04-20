@@ -1,34 +1,12 @@
-import {
-    HomeIcon,
-    ChatAltIcon,
-    BellIcon,
-    HashtagIcon,
-} from "@heroicons/react/outline";
-import {Card} from "~/ui/Card";
-import {NavLink} from "~/ui/NavLink";
-import {SearchInput} from "~/ui/SearchInput";
-import Example from "~/components/example";
-import {faArrowRight, faCheck, faClock, faCrown, faLink, faPlay, faTimes} from "@fortawesome/free-solid-svg-icons";
+import {faArrowRight, faPlay} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {useMutate, useSelector} from "~/state/store";
-import {useDispatch} from "react-redux";
-import {useRouter} from "next/router";
-import {useEffect, useState} from "react";
-import {
-    actionStory,
-    lobbyJoin,
-    actionStart,
-    actionReplayNextEntry,
-    actionReplayBook,
-    actionRestart
-} from "~/components/connection";
-import {returnToLobby} from "~/state/action";
+import {actionReplayBook, actionReplayNextEntry, actionRestart} from "~/components/connection";
 
 
 export default function Replay() {
     const mutate = useMutate();
     const user = useSelector(state => state.user);
-    const config = useSelector(state => state.config);
     const storybook = useSelector(state => state.replay.storybook);
 
     if (!storybook) {

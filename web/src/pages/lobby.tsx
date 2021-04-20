@@ -26,7 +26,6 @@ export default function Lobby() {
     const code = useSelector((state) => state.code);
     const [copiedLink, setCopiedLink] = useState(false);
     const [copiedLinkTimer, setCopiedLinkTimer] = useState<number>();
-    const config = useSelector(state => state.config);
     const user = useSelector(state => state.user);
 
     const playerList = Array.from({length: 10}, (_, i) => players.length > i ? players[i] : null);

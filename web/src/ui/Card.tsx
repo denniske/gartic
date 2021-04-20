@@ -18,11 +18,7 @@ interface Props {
     player: IPlayer;
 }
 
-
-
-
 export function Card(props: Props) {
-    const config = useSelector(state => state.config);
     const user = useSelector(state => state.user);
     const { player } = props;
 

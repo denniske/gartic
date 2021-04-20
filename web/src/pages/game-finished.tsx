@@ -1,25 +1,11 @@
-import {
-    HomeIcon,
-    ChatAltIcon,
-    BellIcon,
-    HashtagIcon,
-} from "@heroicons/react/outline";
-import {Card} from "~/ui/Card";
-import {NavLink} from "~/ui/NavLink";
-import {SearchInput} from "~/ui/SearchInput";
-import Example from "~/components/example";
-import {faCheck, faClock, faCrown, faLink, faPlay, faTimes} from "@fortawesome/free-solid-svg-icons";
+import {faPlay} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {useMutate, useSelector} from "~/state/store";
-import {useDispatch} from "react-redux";
-import {useRouter} from "next/router";
-import {useEffect, useState} from "react";
-import {actionStory, lobbyJoin, actionStart, actionReplay} from "~/components/connection";
+import {useSelector} from "~/state/store";
+import {actionReplay} from "~/components/connection";
 
 
 export default function GameFinished() {
     const user = useSelector(state => state.user);
-    const config = useSelector(state => state.config);
 
     return (
         <div className="p-4 flex flex-col max-w-7xl space-y-5">

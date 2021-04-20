@@ -58,6 +58,7 @@ export class GameClient {
             this.mutate((state) => {
                 state.game.screen = 'startStory';
                 state.game.roundStartTime = new Date(action.time);
+                state.playersDone = 0;
             });
             return;
         }
@@ -68,6 +69,7 @@ export class GameClient {
                 state.game.screen = 'continueStory';
                 state.game.round = action.round;
                 state.game.roundStartTime = new Date(action.time);
+                state.playersDone = 0;
             });
             return;
         }

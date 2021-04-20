@@ -8,16 +8,16 @@ import {Card} from "~/ui/Card";
 import {NavLink} from "~/ui/NavLink";
 import {SearchInput} from "~/ui/SearchInput";
 import Example from "~/components/example";
-import {faCheck, faClock, faCrown, faLink, faPlay, faTimes} from "@fortawesome/free-solid-svg-icons";
+import {faCheck, faClock, faCrown, faLink, faPencilAlt, faPlay, faTimes} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {useMutate, useSelector} from "~/state/store";
 import {useDispatch} from "react-redux";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
-import {actionStory, lobbyJoin, actionStart} from "~/components/connection";
 import {useInterval} from "~/hooks/use-interval";
 import {roundTime} from "~/general.types";
 import Progress from "~/components/progress";
+import {actionStoryDone, actionStoryEdit} from "~/components/connection";
 
 
 export default function GameContinueStory() {
@@ -91,7 +91,7 @@ export default function GameContinueStory() {
                     <button
                         onClick={() => {
                             setDone(true);
-                            actionStory(text);
+                            actionStoryDone(text);
                         }}
                         className="inline-flex justify-center items-center py-2 px-4 border border-transparent button-shadow text-sm font-medium rounded-md text-white bg-white hover:bg-gray-300"
                     >
@@ -104,10 +104,13 @@ export default function GameContinueStory() {
                 {
                     done &&
                     <button
-                        onClick={() => setDone(false)}
+                        onClick={() => {
+                            setDone(false);
+                            actionStoryEdit();
+                        }}
                         className="inline-flex justify-center items-center py-2 px-4 border border-transparent button-shadow text-sm font-medium rounded-md text-white bg-white hover:bg-gray-300"
                     >
-                        <FontAwesomeIcon className="text-green-500 text-shadow" icon={faCheck}/>
+                        <FontAwesomeIcon className="text-green-500 text-shadow" icon={faPencilAlt}/>
                         <span className="px-4 font-bold uppercase text-purple-900">
                             Edit
                         </span>

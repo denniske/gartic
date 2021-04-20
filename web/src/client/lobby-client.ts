@@ -48,15 +48,5 @@ export class LobbyClient {
         if (action.action === 'lobby-member-quit') {
             this.mutate(removePlayerById(action.id));
         }
-
-        // if (message.joined) {
-        //     mutate(addPlayer({id: message.joined.id, name: message.joined.name}));
-        // }
-        // if (message.config) {
-        //     mutate(updateConfig(message.config));
-        // }
-        // if (message.quit) {
-        //     mutate(removePlayerById(message.quit));
-        // }
     }
 }

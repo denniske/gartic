@@ -1,33 +1,20 @@
 import LobbyServer from "../src/server/lobby-server";
 import {IChatRoom} from "../src/chat-room";
-
-class ChatRoomMock implements IChatRoom {
-    broadcast(message: any) {
-        broadcasts.push(message);
-    }
-
-    close(sessionId: string, code: number, reason: string) {
-        lobbyServer.close(sessionId);
-    }
-
-    send(sessionId: string, message: any) {
-        messages.push({sessionId, ...message});
-    }
-}
+import {ChatRoomMock} from "../src/mock";
 
 
 let broadcasts: any[] = [];
 let messages: any[] = [];
 
-let chatRoomMock = new ChatRoomMock();
 let lobbyServer: LobbyServer;
+let chatRoomMock = new ChatRoomMock(broadcasts, messages);
 
 describe('LobbyServer', () => {
-    // Applies only to tests in this describe block
     beforeEach(() => {
-        broadcasts = [];
-        messages = [];
+        broadcasts.length = 0;
+        messages.length = 0;
         lobbyServer = new LobbyServer(chatRoomMock);
+        chatRoomMock.server = lobbyServer;
     });
 
     test('join will broadcast new member', () => {
@@ -77,7 +64,7 @@ describe('LobbyServer', () => {
         lobbyServer.open(sessionId2);
         lobbyServer.message(sessionId2, {action: 'lobby-join', id: 'u2', name: 'Dennis2'});
 
-        broadcasts = [];
+        broadcasts.length = 0;
 
         lobbyServer.message(sessionId, {action: 'lobby-kick', id: 'u2'});
 
@@ -123,7 +110,7 @@ describe('LobbyServer', () => {
         lobbyServer.open(sessionId2);
         lobbyServer.message(sessionId2, {action: 'lobby-join', id: 'u2', name: 'Dennis2'});
 
-        broadcasts = [];
+        broadcasts.length = 0;
 
         lobbyServer.close(sessionId);
 
@@ -139,3 +126,29 @@ describe('LobbyServer', () => {
         ]);
     });
 });
+
+// const dummyNames = ['Dennis', 'John'];
+//
+// function createDummyStory(sessionId: string, index: number): IStoryEntry[] {
+//     return [
+//         {
+//             userId: sessionId,
+//             userName: dummyNames[index],
+//             text: dummyNames[index]+'0',
+//             shown: true,
+//         },
+//         {
+//             userId: sessionId,
+//             userName: dummyNames[(index+1)%2],
+//             text: dummyNames[(index+1)%2]+'1',
+//             shown: false,
+//         },
+//     ];
+// }
+
+// Fake data
+// this.state = State.Finished;
+// this.storyLength = 2;
+// this.userStories.clear();
+// this.userStories.set(this.sessions[0].id!, createDummyStory(this.sessions[0].id!, 0));
+// this.userStories.set(this.sessions[1].id!, createDummyStory(this.sessions[1].id!, 1));

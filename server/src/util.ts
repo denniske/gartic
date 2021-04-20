@@ -5,6 +5,7 @@ export async function handleErrors(request: Request, func: () => Promise<Respons
   try {
     return await func();
   } catch (err) {
+    console.error(err);
     if (request.headers.get("Upgrade") == "websocket") {
       // Annoyingly, if we return an HTTP error in response to a WebSocket request, Chrome devtools
       // won't show us the response body! So... let's send a WebSocket response with an error
@@ -23,4 +24,8 @@ export async function handleErrors(request: Request, func: () => Promise<Respons
 export function getUniqueID() {
   const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
   return s4() + s4() + '-' + s4();
+}
+
+export function selectRandomElement<T>(items: T[]): T {
+  return items[Math.floor(Math.random() * items.length)];
 }

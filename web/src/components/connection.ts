@@ -52,19 +52,6 @@ export function initConnection(_mutate: Mutate, code: string): Promise<void> {
 
             lobbyClient.message(message);
             gameClient.message(message);
-
-            // if (message.action) {
-            //     gameClient.message(message);
-            // }
-            // if (message.joined) {
-            //     mutate(addPlayer({id: message.joined.id, name: message.joined.name}));
-            // }
-            // if (message.config) {
-            //     mutate(updateConfig(message.config));
-            // }
-            // if (message.quit) {
-            //     mutate(removePlayerById(message.quit));
-            // }
         };
 
         client.onclose = (event: ICloseEvent) => {
@@ -115,8 +102,12 @@ export function actionRestart() {
     client.send(JSON.stringify({action: 'restart' }));
 }
 
-export function actionStory(text: string) {
-    client.send(JSON.stringify({action: 'story', text}));
+export function actionStoryEdit() {
+    client.send(JSON.stringify({action: 'storyEdit'}));
+}
+
+export function actionStoryDone(text: string) {
+    client.send(JSON.stringify({action: 'storyDone', text}));
 }
 
 export function quit() {

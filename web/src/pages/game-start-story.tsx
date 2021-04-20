@@ -1,20 +1,8 @@
-import {
-    HomeIcon,
-    ChatAltIcon,
-    BellIcon,
-    HashtagIcon,
-} from "@heroicons/react/outline";
-import {Card} from "~/ui/Card";
-import {NavLink} from "~/ui/NavLink";
-import {SearchInput} from "~/ui/SearchInput";
-import Example from "~/components/example";
-import {faCheck, faClock, faCrown, faLink, faPlay, faTimes} from "@fortawesome/free-solid-svg-icons";
+import {faCheck, faPencilAlt} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {useMutate, useSelector} from "~/state/store";
-import {useDispatch} from "react-redux";
-import {useRouter} from "next/router";
+import {useSelector} from "~/state/store";
 import {useEffect, useState} from "react";
-import {actionStory, lobbyJoin, actionStart} from "~/components/connection";
+import {actionStoryDone, actionStoryEdit} from "~/components/connection";
 import Progress from "~/components/progress";
 import {useInterval} from "~/hooks/use-interval";
 import {roundTime} from "~/general.types";
@@ -22,7 +10,7 @@ import {roundTime} from "~/general.types";
 
 export default function GameStartStory() {
     const user = useSelector(state => state.user);
-    const [text, setText] = useState(user.name + '0');
+    const [text, setText] = useState(user.name + '-0');
     const [done, setDone] = useState(false);
     const playersDone = useSelector((state) => state.playersDone);
     const players = useSelector((state) => state.players);
@@ -30,9 +18,13 @@ export default function GameStartStory() {
     const [progress, setProgress] = useState(0);
 
     useInterval(() => {
-        const elapsed = (new Date().getTime() - game.roundStartTime.getTime())/1000;
+        const elapsed = (new Date().getTime() - game.roundStartTime.getTime()) / 1000;
         setProgress(elapsed / roundTime * 100);
     }, 100);
+
+    useEffect(() => {
+        actionStoryDone(text);
+    }, []);
 
     return (
         <div className="p-4 flex flex-col max-w-7xl space-y-5">
@@ -70,8 +62,8 @@ export default function GameStartStory() {
                     !done &&
                     <button
                         onClick={() => {
-                            actionStory(text);
                             setDone(true);
+                            actionStoryDone(text);
                         }}
                         className="inline-flex justify-center items-center py-2 px-4 border border-transparent button-shadow text-sm font-medium rounded-md text-white bg-white hover:bg-gray-300"
                     >
@@ -84,10 +76,13 @@ export default function GameStartStory() {
                 {
                     done &&
                     <button
-                        onClick={() => setDone(false)}
+                        onClick={() => {
+                            setDone(false);
+                            actionStoryEdit();
+                        }}
                         className="inline-flex justify-center items-center py-2 px-4 border border-transparent button-shadow text-sm font-medium rounded-md text-white bg-white hover:bg-gray-300"
                     >
-                        <FontAwesomeIcon className="text-green-500 text-shadow" icon={faCheck}/>
+                        <FontAwesomeIcon className="text-green-500 text-shadow" icon={faPencilAlt}/>
                         <span className="px-4 font-bold uppercase text-purple-900">
                             Edit
                         </span>

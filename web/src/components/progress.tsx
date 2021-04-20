@@ -1,21 +1,3 @@
-import {
-    HomeIcon,
-    ChatAltIcon,
-    BellIcon,
-    HashtagIcon,
-} from "@heroicons/react/outline";
-import {Card} from "~/ui/Card";
-import {NavLink} from "~/ui/NavLink";
-import {SearchInput} from "~/ui/SearchInput";
-import Example from "~/components/example";
-import {faCheck, faClock, faCrown, faLink, faPlay, faTimes} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {useMutate, useSelector} from "~/state/store";
-import {useDispatch} from "react-redux";
-import {useRouter} from "next/router";
-import {useEffect, useState} from "react";
-import {actionStory, lobbyJoin, actionStart, initConnection} from "~/components/connection";
-import {speak} from "~/components/speech";
 
 interface Props {
     progress: number;

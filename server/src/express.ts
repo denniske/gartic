@@ -4,6 +4,8 @@ import {ChatRoom} from "./chat-room";
 import {WebSocketLike} from "./types";
 import {getUniqueID} from "./util";
 
+require('source-map-support').install();
+
 const webSocketsServerPort = 8000;
 // const webSocketServer = require('websocket').server;
 
@@ -106,16 +108,16 @@ class WebsocketMock implements WebSocketLike {
 const chatRooms = new Map<string, ChatRoom>();
 
 wsServer.on('request', function(request) {
-    console.log(request.httpRequest.url);
+    // console.log(request.httpRequest.url);
 
     const code = request.httpRequest.url?.replace('/', '')!;
 
     const userID = getUniqueID();
-    console.log((new Date()) + ' Recieved a new connection from origin ' + request.origin + '.');
+    // console.log((new Date()) + ' Recieved a new connection from origin ' + request.origin + '.');
     // You can rewrite this part of the code to accept only the requests from allowed origin
     const connection = request.accept(undefined, request.origin);
     clients[userID] = connection;
-    console.log('connected: ' + userID + ' in ' + Object.getOwnPropertyNames(clients))
+    // console.log('connected: ' + userID + ' in ' + Object.getOwnPropertyNames(clients))
 
     const webSocketMock = new WebsocketMock(connection);
 
