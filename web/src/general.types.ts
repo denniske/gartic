@@ -23,4 +23,5 @@ export interface IStorybookEntry {
     userName: string;
     text: string;
     shown: boolean;
+    new: boolean;
 }

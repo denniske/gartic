@@ -37,7 +37,6 @@ export default function Landing() {
         });
         await initConnection(mutate, gameCode);
         lobbyJoin(name || placeholderName);
-        // speak(name || placeholderName);
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {

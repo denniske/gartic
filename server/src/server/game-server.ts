@@ -8,6 +8,7 @@ interface IStoryEntry {
     userName: string;
     text: string;
     shown: boolean;
+    new: boolean;
 }
 
 interface IStoryEditAction {
@@ -84,7 +85,7 @@ export default class GameServer {
         return this.storybooks.find(s => s.user.id == memberId)!;
     }
 
-    sendStorybook(index: number) {
+    sendStorybook(index: number, markLastEntryAsNew: boolean = false) {
         const storybook = this.storybooks[index];
 
         const entriesToSend = [];
@@ -95,6 +96,12 @@ export default class GameServer {
                 entriesToSend.push(entry);
                 break;
             }
+        }
+
+        if (markLastEntryAsNew) {
+            const shown = entriesToSend.filter(e => e.shown);
+            const lastShown = shown[shown.length-1];
+            lastShown.new = true;
         }
 
         this.chatRoom.broadcast({
@@ -116,8 +123,11 @@ export default class GameServer {
         const storybook = this.storybooks[index];
 
         for (const entry of storybook.entries) {
+            // entry.new = false
+
             if (!entry.shown) {
                 entry.shown = true;
+                // entry.new = true;
                 break;
             }
         }
@@ -162,11 +172,11 @@ export default class GameServer {
         }
         if (action.action === 'replay') {
             this.chatRoom.broadcast({action: 'replay'});
-            this.sendStorybook(0);
+            this.sendStorybook(0, true);
         }
         if (action.action === 'replayNextEntry') {
             const index = this.markLastStorybookEntryAsShown();
-            this.sendStorybook(index);
+            this.sendStorybook(index, true);
         }
         if (action.action === 'replayBook') {
             this.sendStorybook(action.index);
@@ -214,6 +224,7 @@ export default class GameServer {
                         userName: m.name!,
                         text: m.currentInput!,
                         shown: true,
+                        new: false,
                     });
                 }
                 this.state = State.ContinueStory;
@@ -230,6 +241,7 @@ export default class GameServer {
                         userName: m.name!,
                         text: m.currentInput!,
                         shown: false,
+                        new: false,
                     });
                 }
                 this.members.forEach(m => m.currentInput = '');
