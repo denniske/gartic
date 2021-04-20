@@ -2,7 +2,7 @@ import {faPlay} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {useMutate, useSelector} from "~/state/store";
 import {useRouter} from "next/router";
-import {useEffect, useState} from "react";
+import {KeyboardEvent, useEffect, useState} from "react";
 import {actionStoryDone, initConnection, lobbyJoin} from "~/components/connection";
 
 
@@ -40,6 +40,15 @@ export default function Landing() {
         // speak(name || placeholderName);
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.code === 'Enter') {
+            init();
+        }
+        if (e.code === 'Escape') {
+            init();
+        }
+    };
+
     return (
         <div className="p-4 flex flex-col max-w-7xl space-y-5">
 
@@ -60,6 +69,7 @@ export default function Landing() {
                     placeholder={placeholderName}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    onKeyDown={handleKeyDown}
                 />
             </div>
 

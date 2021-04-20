@@ -70,6 +70,10 @@ export function initConnection(_mutate: Mutate, code: string): Promise<void> {
 }
 
 
+export function lobbyDebug() {
+    client.send(JSON.stringify({action: 'lobby-debug'}));
+}
+
 export function lobbyJoin(name: string) {
     const user = {id: getUniqueID()};
     mutate(updateUser(user));

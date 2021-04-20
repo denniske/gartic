@@ -2,6 +2,11 @@ import {Mutate} from "~/state/store";
 import {IPlayer} from "~/general.types";
 import {addPlayer, removePlayerById, updatePlayer, updateUser} from "~/state/action";
 
+interface ILobbyDebugAction {
+    action: 'lobby-debug';
+    debug: any;
+}
+
 interface ILobbyMemberJoinAction {
     action: 'lobby-member-join';
     member: IPlayer;
@@ -17,7 +22,7 @@ interface ILobbyMemberQuitAction {
     id: string;
 }
 
-type Action = ILobbyMemberJoinAction | ILobbyMemberUpdateAction | ILobbyMemberQuitAction;
+type Action = ILobbyMemberJoinAction | ILobbyMemberUpdateAction | ILobbyMemberQuitAction | ILobbyDebugAction;
 
 const closeReasonKicked = 'REASON_KICKED';
 
@@ -34,6 +39,9 @@ export class LobbyClient {
     }
 
     message(action: Action) {
+        if (action.action === 'lobby-debug') {
+            console.log('Lobby debug', (new Date(action.debug) as Date).toLocaleString());
+        }
         if (action.action === 'lobby-member-join') {
             this.mutate(addPlayer(action.member));
             this.mutate(state => {
@@ -44,6 +52,11 @@ export class LobbyClient {
         }
         if (action.action === 'lobby-member-update') {
             this.mutate(updatePlayer(action.member));
+            this.mutate(state => {
+                if (state.user.id === action.member.id) {
+                    updateUser(action.member)(state);
+                }
+            });
         }
         if (action.action === 'lobby-member-quit') {
             this.mutate(removePlayerById(action.id));

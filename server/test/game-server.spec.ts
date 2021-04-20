@@ -4,7 +4,6 @@ import GameServer from "../src/server/game-server";
 import {ChatRoomMock} from "../src/mock";
 
 
-
 let broadcasts: any[] = [];
 let messages: any[] = [];
 
@@ -108,7 +107,7 @@ describe('GameServer', () => {
         // ]);
     });
 
-    test.only.each(Array(20).fill('i').map((x, i) => i))('4 players (%s)', () => {
+    test.each(Array(20).fill('i').map((x, i) => i))('4 players (%s)', () => {
         const sessionId = 's1';
         lobbyServer.open(sessionId);
         lobbyServer.message(sessionId, {action: 'lobby-join', id: 'u1', name: 'Dennis'});

@@ -1,6 +1,5 @@
 import {IChatRoom} from "../chat-room";
 import LobbyServer, {IMember} from "./lobby-server";
-import {selectRandomElement} from "../util";
 import {cloneDeep, remove} from "lodash";
 import {generatePairing, generatePairings, Pairing} from "../pairing";
 
@@ -41,7 +40,14 @@ interface IReplayNextEntryAction {
     action: 'replayNextEntry';
 }
 
-type Action = IStoryEditAction | IStoryDoneAction | IStartAction | IReplayAction | IReplayBookAction | IReplayNextEntryAction | IRestartAction;
+type Action =
+    IStoryEditAction
+    | IStoryDoneAction
+    | IStartAction
+    | IReplayAction
+    | IReplayBookAction
+    | IReplayNextEntryAction
+    | IRestartAction;
 
 enum State {
     StartStory = 'START_STORY',
@@ -50,7 +56,7 @@ enum State {
 }
 
 interface IGameMember extends IMember {
-    currentTargetId?: string;
+    currentTargetIndex?: number;
     currentInput?: string;
     done?: boolean;
 }
@@ -206,7 +212,7 @@ export default class GameServer {
                     case State.ContinueStory:
                         console.log('members', this.members);
                         for (const m of this.members) {
-                            const storybook = this.getStorybookForMember(m.currentTargetId!);
+                            const storybook = this.storybooks[m.currentTargetIndex!];
                             storybook.entries.push({
                                 userId: m.id!,
                                 userName: m.name!,
@@ -227,41 +233,20 @@ export default class GameServer {
                 if (this.storyLength < this.members.length) {
                     this.chatRoom.broadcast({action: 'nextRound', round: this.storyLength, time: new Date()});
 
-                    this.members.forEach(m => m.currentTargetId = undefined);
+                    this.members.forEach(m => m.currentTargetIndex = undefined);
 
                     console.log('Distribute stories randomly', this.members);
 
-
                     const pairing = generatePairing(this.pairings, this.members.length);
-                    pairing.forEach(p => this.members[p[0]].currentTargetId = this.members[p[1]].id);
+                    pairing.forEach(p => this.members[p[0]].currentTargetIndex = p[1]);
                     pairing.forEach(p => remove(this.pairings, x => x == p));
 
-                    let availableStories = [...this.storybooks];
-
                     for (const distMember of this.members) {
-                        console.log(distMember);
-                        console.log('availableStories', JSON.stringify(availableStories, null, 4));
-
-                        console.log('availableStories.length', availableStories.length);
-                        const selectableStories = availableStories.filter(s =>
-                            // Do not add to story which you already added to
-                            !s.entries.some(storyEntry => storyEntry.userId === distMember.id) //&&
-                            // Do not add to story whose target is you
-                            // (this.members.length % 2 == 0 || this.members.find(m => m.id == s.user.id)!.currentTargetId != distMember.id)
-                        );
-
-                        console.log('selectableStories.length', selectableStories.length);
-                        const selectedStory = selectRandomElement(selectableStories);
-                        console.log('selectableStory', selectedStory);
-
-                        distMember.currentTargetId = selectedStory.user.id;
-
+                        const targetStorybook = this.storybooks[distMember.currentTargetIndex!];
                         this.chatRoom.send(distMember.sessionId, {
                             action: 'previousStory',
-                            text: selectedStory.entries[selectedStory.entries.length - 1].text,
+                            text: targetStorybook.entries[targetStorybook.entries.length - 1].text,
                         });
-
-                        availableStories = availableStories.filter(s => s != selectedStory);
                     }
                 } else {
                     this.state = State.Finished;

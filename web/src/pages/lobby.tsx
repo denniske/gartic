@@ -14,9 +14,10 @@ import {useMutate, useSelector} from "~/state/store";
 import {useDispatch} from "react-redux";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
-import {lobbyJoin, actionStart, quit} from "~/components/connection";
+import {lobbyJoin, actionStart, quit, lobbyDebug} from "~/components/connection";
 import {copyTextToClipboard} from "~/components/clipboard";
 import Progress from "~/components/progress";
+import {useKeyUp} from "~/hooks/use-key-up";
 
 
 export default function Lobby() {
@@ -43,6 +44,12 @@ export default function Lobby() {
         const timer = setTimeout(() => setCopiedLink(false), 2000) as any;
         setCopiedLinkTimer(timer);
     };
+
+    useKeyUp((event) => {
+        if (event.code == 'Escape') {
+            lobbyDebug();
+        }
+    }, [])
 
     // <div className="bg-purple-800 p-4 flex flex-col min-h-screen max-w-7xl mx-auto space-y-3">
     return (

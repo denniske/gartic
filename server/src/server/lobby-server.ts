@@ -1,6 +1,10 @@
 import {IChatRoom} from "../chat-room";
 
 
+interface IDebugAction {
+    action: 'lobby-debug';
+}
+
 interface IKickAction {
     action: 'lobby-kick';
     id: string;
@@ -12,7 +16,7 @@ interface IJoinAction {
     name: string;
 }
 
-type Action = IKickAction | IJoinAction;
+type Action = IKickAction | IJoinAction | IDebugAction;
 
 const closeReasonKicked = 'REASON_KICKED';
 
@@ -24,7 +28,9 @@ export interface IMember {
 }
 
 export default class LobbyServer {
+    created = new Date();
     members: IMember[];
+
     // adminUserId?: string;
 
     constructor(private chatRoom: IChatRoom) {
@@ -53,6 +59,9 @@ export default class LobbyServer {
 
     message(sessionId: string, action: Action) {
         console.log();
+        if (action.action == 'lobby-debug') {
+            this.chatRoom.send(sessionId, { action: 'lobby-debug', debug: this.created });
+        }
         if (action.action == 'lobby-join') {
             if (action.id == null) {
                 this.chatRoom.send(sessionId, {error: "No id specified."});
@@ -103,16 +112,16 @@ export default class LobbyServer {
 
             // Send all existing users to new connection.
             this.members.filter(m => m != member).forEach(m => {
-               this.chatRoom.send(sessionId, {
-                   action: 'lobby-member-join',
-                   member: { id: m.id, name: m.name, admin: m.admin },
-               })
+                this.chatRoom.send(sessionId, {
+                    action: 'lobby-member-join',
+                    member: {id: m.id, name: m.name, admin: m.admin},
+                })
             });
 
             // Broadcast that this user has joined.
             this.chatRoom.broadcast({
                 action: 'lobby-member-join',
-                member: { id: member.id, name: member.name, admin: member.admin },
+                member: {id: member.id, name: member.name, admin: member.admin},
             });
 
             // this.chatRoom.send(sessionId, {
@@ -136,7 +145,7 @@ export default class LobbyServer {
 
         this.chatRoom.broadcast({
             action: 'lobby-member-update',
-            member: { id: this.members[0].id, name: this.members[0].name, admin: this.members[0].admin },
+            member: {id: this.members[0].id, name: this.members[0].name, admin: this.members[0].admin},
         });
 
         // if (!this.members.some(s => s.admin)) {
