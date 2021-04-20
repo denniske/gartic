@@ -28,16 +28,18 @@ export interface IMember {
 }
 
 export default class LobbyServer {
-    created = new Date();
+    created: Date | null;
     members: IMember[];
 
     // adminUserId?: string;
 
     constructor(private chatRoom: IChatRoom) {
+        this.created = null;
         this.members = [];
     }
 
     open(sessionId: string) {
+        this.created = this.created ?? new Date();
         // this.members.push({
         //     sessionId,
         // });
@@ -60,7 +62,7 @@ export default class LobbyServer {
     message(sessionId: string, action: Action) {
         console.log();
         if (action.action == 'lobby-debug') {
-            this.chatRoom.send(sessionId, { action: 'lobby-debug', debug: this.created, debug2: new Date() });
+            this.chatRoom.send(sessionId, { action: 'lobby-debug', debug: this.created });
         }
         if (action.action == 'lobby-join') {
             if (action.id == null) {

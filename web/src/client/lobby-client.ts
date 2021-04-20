@@ -5,7 +5,6 @@ import {addPlayer, removePlayerById, updatePlayer, updateUser} from "~/state/act
 interface ILobbyDebugAction {
     action: 'lobby-debug';
     debug: any;
-    debug2: any;
 }
 
 interface ILobbyMemberJoinAction {
@@ -42,7 +41,6 @@ export class LobbyClient {
     message(action: Action) {
         if (action.action === 'lobby-debug') {
             console.log('Lobby debug', (new Date(action.debug) as Date).toLocaleString());
-            console.log('Lobby debug2', (new Date(action.debug2) as Date).toLocaleString());
         }
         if (action.action === 'lobby-member-join') {
             this.mutate(addPlayer(action.member));
