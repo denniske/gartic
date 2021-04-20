@@ -98,11 +98,11 @@ export default class GameServer {
             }
         }
 
-        if (markLastEntryAsNew) {
-            const shown = entriesToSend.filter(e => e.shown);
-            const lastShown = shown[shown.length-1];
-            lastShown.new = true;
-        }
+        // if (markLastEntryAsNew) {
+        //     const shown = entriesToSend.filter(e => e.shown);
+        //     const lastShown = shown[shown.length-1];
+        //     lastShown.new = true;
+        // }
 
         this.chatRoom.broadcast({
             action: 'storybook',
@@ -123,11 +123,8 @@ export default class GameServer {
         const storybook = this.storybooks[index];
 
         for (const entry of storybook.entries) {
-            // entry.new = false
-
             if (!entry.shown) {
                 entry.shown = true;
-                // entry.new = true;
                 break;
             }
         }
