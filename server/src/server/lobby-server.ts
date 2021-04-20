@@ -60,7 +60,7 @@ export default class LobbyServer {
     message(sessionId: string, action: Action) {
         console.log();
         if (action.action == 'lobby-debug') {
-            this.chatRoom.send(sessionId, { action: 'lobby-debug', debug: this.created });
+            this.chatRoom.send(sessionId, { action: 'lobby-debug', debug: this.created, debug2: new Date() });
         }
         if (action.action == 'lobby-join') {
             if (action.id == null) {
