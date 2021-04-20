@@ -27,10 +27,10 @@ export default function Replay() {
         //     }
         // }
 
-        const newEntry = storybook.entries.find(e => e.new);
-        if (newEntry) {
-            speak(newEntry.text);
-        }
+        // const newEntry = storybook.entries.find(e => e.new);
+        // if (newEntry) {
+        //     speak(newEntry.text);
+        // }
 
     }, [storybook]);
 
