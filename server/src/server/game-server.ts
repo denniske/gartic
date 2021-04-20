@@ -138,7 +138,6 @@ export default class GameServer {
     timer() {
         // 60 seconds
         if (this.timerStarted && (new Date().getTime() - this.timerStarted.getTime()) / 1000 > 60) {
-            // this.chatRoom.broadcast({ action: ''})
             this.timerStarted = undefined;
             this.newRound();
         }
@@ -150,6 +149,14 @@ export default class GameServer {
 
     close(sessionId: string) {
 
+    }
+
+    startTimer() {
+        this.timerStarted = new Date();
+    }
+
+    stopTimer() {
+        this.timerStarted = undefined;
     }
 
     message(sessionId: string, action: Action) {
@@ -165,7 +172,7 @@ export default class GameServer {
                 entries: [],
             }));
             this.chatRoom.broadcast({action: 'start', time: new Date()});
-            this.timerStarted = new Date();
+            this.startTimer();
         }
         if (action.action === 'restart') {
             this.chatRoom.broadcast({action: 'restart'});
@@ -253,7 +260,7 @@ export default class GameServer {
         // Distribute stories randomly
         if (this.storyLength < this.members.length) {
             this.chatRoom.broadcast({action: 'nextRound', round: this.storyLength, time: new Date()});
-            this.timerStarted = new Date();
+            this.startTimer();
 
             this.members.forEach(m => m.currentTargetIndex = undefined);
 
@@ -273,6 +280,7 @@ export default class GameServer {
         } else {
             this.state = State.Finished;
             this.chatRoom.broadcast({action: 'finished'});
+            this.stopTimer();
             console.log(this.storybooks);
         }
     }
