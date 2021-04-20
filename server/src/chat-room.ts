@@ -116,8 +116,6 @@ export class ChatRoom implements DurableObject, IChatRoom {
         let session = {id: getUniqueID(), webSocket} as ISession;
         this.sessions.push(session);
 
-        this.lobbyServer.open(session.id)
-
         // Queue "join" messages for all online users, to populate the client's roster.
         // this.sessions.forEach(otherSession => {
         //   if (otherSession.name) {
@@ -135,6 +133,7 @@ export class ChatRoom implements DurableObject, IChatRoom {
         // });
 
         this.lobbyServer.open(session.id);
+        this.gameServer.open(session.id);
 
         setInterval(() => this.exit(), 1000);
 

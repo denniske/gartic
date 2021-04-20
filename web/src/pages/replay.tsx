@@ -31,7 +31,18 @@ export default function Replay() {
                         <div className="bg-gray-300 shadow-sm px-3 py-2 mt-1 block w-full sm:text-sm border-gray-300 rounded-md">
                             {
                                 entry.shown &&
-                                <span>{entry.text}</span>
+                                <div>
+                                    {
+                                        entry.text &&
+                                        <span>{entry.text}</span>
+                                    }
+                                    {
+                                        !entry.text &&
+                                        <div className="inline-block uppercase rounded-md px-2 py-1 bg-gray-200 border-gray-500 text-gray-500">
+                                            Empty
+                                        </div>
+                                    }
+                                </div>
                             }
                             {
                                 !entry.shown && user.admin &&

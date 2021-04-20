@@ -71,6 +71,7 @@ interface IStorybook {
 export default class GameServer {
     state: State = State.StartStory;
     storyLength: number = 0;
+    timerStarted?: Date;
 
     members: IGameMember[] = [];
     pairings: Pairing[] = [];
@@ -95,9 +96,6 @@ export default class GameServer {
                 break;
             }
         }
-
-        // console.log(storybook.user);
-        // console.log(this.members);
 
         this.chatRoom.broadcast({
             action: 'storybook',
@@ -127,15 +125,25 @@ export default class GameServer {
         return index;
     }
 
+    timer() {
+        // 60 seconds
+        if (this.timerStarted && (new Date().getTime() - this.timerStarted.getTime()) / 1000 > 60) {
+            // this.chatRoom.broadcast({ action: ''})
+            this.timerStarted = undefined;
+            this.newRound();
+        }
+    }
+
+    open(sessionId: string) {
+        setInterval(() => this.timer(), 1000);
+    }
+
     close(sessionId: string) {
 
     }
 
     message(sessionId: string, action: Action) {
         console.log();
-        // console.log('STATE', this.state);
-        // console.log('STORY LENGTH', this.storyLength);
-        // console.log('PROCESS', action.action);
         if (action.action === 'start') {
             this.state = State.StartStory;
             this.storyLength = 0;
@@ -147,6 +155,7 @@ export default class GameServer {
                 entries: [],
             }));
             this.chatRoom.broadcast({action: 'start', time: new Date()});
+            this.timerStarted = new Date();
         }
         if (action.action === 'restart') {
             this.chatRoom.broadcast({action: 'restart'});
@@ -189,71 +198,70 @@ export default class GameServer {
             const playersDoneCount = this.members.filter(m => m.done).length;
             this.chatRoom.broadcast({action: 'playersDone', count: playersDoneCount});
 
-            // console.log('this.userInputs.size', inputCount);
-            // console.log('this.members.length', this.members.length);
-
             if (playersDoneCount === this.members.length) {
-                switch (this.state) {
-                    case State.StartStory:
-                        for (const m of this.members) {
-                            const storybook = this.getStorybookForMember(m.id!);
-                            storybook.entries.push({
-                                userId: m.id!,
-                                userName: m.name!,
-                                text: m.currentInput!,
-                                shown: true,
-                            });
-                        }
-                        this.state = State.ContinueStory;
-                        this.members.forEach(m => m.currentInput = '');
-                        this.members.forEach(m => m.done = false);
-                        this.storyLength = 1;
-                        break;
-                    case State.ContinueStory:
-                        console.log('members', this.members);
-                        for (const m of this.members) {
-                            const storybook = this.storybooks[m.currentTargetIndex!];
-                            storybook.entries.push({
-                                userId: m.id!,
-                                userName: m.name!,
-                                text: m.currentInput!,
-                                shown: false,
-                            });
-                        }
-                        this.members.forEach(m => m.currentInput = '');
-                        this.members.forEach(m => m.done = false);
-                        this.storyLength++;
-                        break;
-                }
-
-                // console.log('this.storyLength', this.storyLength);
-                // console.log('this.members.length', this.members.length);
-
-                // Distribute stories randomly
-                if (this.storyLength < this.members.length) {
-                    this.chatRoom.broadcast({action: 'nextRound', round: this.storyLength, time: new Date()});
-
-                    this.members.forEach(m => m.currentTargetIndex = undefined);
-
-                    console.log('Distribute stories randomly', this.members);
-
-                    const pairing = generatePairing(this.pairings, this.members.length);
-                    pairing.forEach(p => this.members[p[0]].currentTargetIndex = p[1]);
-                    pairing.forEach(p => remove(this.pairings, x => x == p));
-
-                    for (const distMember of this.members) {
-                        const targetStorybook = this.storybooks[distMember.currentTargetIndex!];
-                        this.chatRoom.send(distMember.sessionId, {
-                            action: 'previousStory',
-                            text: targetStorybook.entries[targetStorybook.entries.length - 1].text,
-                        });
-                    }
-                } else {
-                    this.state = State.Finished;
-                    this.chatRoom.broadcast({action: 'finished'});
-                    console.log(this.storybooks);
-                }
+                this.newRound();
             }
+        }
+    }
+
+    newRound() {
+        switch (this.state) {
+            case State.StartStory:
+                for (const m of this.members) {
+                    const storybook = this.getStorybookForMember(m.id!);
+                    storybook.entries.push({
+                        userId: m.id!,
+                        userName: m.name!,
+                        text: m.currentInput!,
+                        shown: true,
+                    });
+                }
+                this.state = State.ContinueStory;
+                this.members.forEach(m => m.currentInput = '');
+                this.members.forEach(m => m.done = false);
+                this.storyLength = 1;
+                break;
+            case State.ContinueStory:
+                console.log('members', this.members);
+                for (const m of this.members) {
+                    const storybook = this.storybooks[m.currentTargetIndex!];
+                    storybook.entries.push({
+                        userId: m.id!,
+                        userName: m.name!,
+                        text: m.currentInput!,
+                        shown: false,
+                    });
+                }
+                this.members.forEach(m => m.currentInput = '');
+                this.members.forEach(m => m.done = false);
+                this.storyLength++;
+                break;
+        }
+
+        // Distribute stories randomly
+        if (this.storyLength < this.members.length) {
+            this.chatRoom.broadcast({action: 'nextRound', round: this.storyLength, time: new Date()});
+            this.timerStarted = new Date();
+
+            this.members.forEach(m => m.currentTargetIndex = undefined);
+
+            console.log('Distribute stories randomly', this.members);
+
+            const pairing = generatePairing(this.pairings, this.members.length);
+            pairing.forEach(p => this.members[p[0]].currentTargetIndex = p[1]);
+            pairing.forEach(p => remove(this.pairings, x => x == p));
+
+            for (const distMember of this.members) {
+                const targetStorybook = this.storybooks[distMember.currentTargetIndex!];
+                this.chatRoom.send(distMember.sessionId, {
+                    action: 'previousStory',
+                    text: targetStorybook.entries[targetStorybook.entries.length - 1].text,
+                });
+            }
+        } else {
+            this.state = State.Finished;
+            this.chatRoom.broadcast({action: 'finished'});
+            console.log(this.storybooks);
         }
     }
 
