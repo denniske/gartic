@@ -39,6 +39,8 @@ class SocketClient {
     }
 }
 
+let index = 0;
+
 describe('Websocket', () => {
     beforeEach(() => {
 
@@ -49,10 +51,10 @@ describe('Websocket', () => {
 
         console.log(new Date());
         const client = new SocketClient();
-        await client.connect(code);
+        await client.connect(code + index);
         await client.send({action: 'lobby-join', id: 'u1', name: 'Dennis'});
         const client2 = new SocketClient();
-        await client2.connect(code);
+        await client2.connect(code + index);
         await client2.send({action: 'lobby-join', id: 'u2', name: 'John'});
 
         await client.send({action: 'start'});
@@ -77,6 +79,8 @@ describe('Websocket', () => {
         expect(client.messages.filter(m => m.action == 'storybook').length).toEqual(4);
         expect(client2.messages.filter(m => m.action == 'storybook').length).toEqual(4);
 
-        await sleep(60 * 1000);
+        await sleep(5 * 60 * 1000);
+
+        index++;
     });
 });
