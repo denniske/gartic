@@ -19,7 +19,9 @@ export interface ISession {
 
 export interface IChatRoom {
     send(sessionId: string, message: any): void;
+
     broadcast(message: any): void;
+
     close(sessionId: string, code: number, reason: string): void;
 }
 
@@ -131,9 +133,15 @@ export class ChatRoom implements DurableObject, IChatRoom {
         // backlog.forEach(value => {
         //   session.blockedMessages?.push(value as string);
         // });
-
-        this.lobbyServer.open(session.id);
-        this.gameServer.open(session.id);
+        try {
+            this.lobbyServer.open(session.id);
+            this.gameServer.open(session.id);
+        } catch (err) {
+            // Report any exceptions directly back to the client. As with our handleErrors() this
+            // probably isn't what you'd want to do in production, but it's convenient when testing.
+            console.error('HANDLED SESSION ERROR', session.id, err);
+            webSocket.send(JSON.stringify({action: 'error', error: err.stack}));
+        }
 
         setInterval(() => this.exit(), 1000);
 
@@ -195,8 +203,8 @@ export class ChatRoom implements DurableObject, IChatRoom {
             } catch (err) {
                 // Report any exceptions directly back to the client. As with our handleErrors() this
                 // probably isn't what you'd want to do in production, but it's convenient when testing.
-                console.error(session.id, err);
-                webSocket.send(JSON.stringify({error: err.stack}));
+                console.error('HANDLED SESSION ERROR', session.id, err);
+                webSocket.send(JSON.stringify({action: 'error', error: err.stack}));
             }
         });
 

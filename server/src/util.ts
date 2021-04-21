@@ -5,7 +5,7 @@ export async function handleErrors(request: Request, func: () => Promise<Respons
   try {
     return await func();
   } catch (err) {
-    console.error(err);
+    console.error('HANDLED ERROR', err);
     if (request.headers.get("Upgrade") == "websocket") {
       // Annoyingly, if we return an HTTP error in response to a WebSocket request, Chrome devtools
       // won't show us the response body! So... let's send a WebSocket response with an error

@@ -22,14 +22,25 @@ interface ILobbyMemberQuitAction {
     id: string;
 }
 
-type Action = ILobbyMemberJoinAction | ILobbyMemberUpdateAction | ILobbyMemberQuitAction | ILobbyDebugAction;
+interface IErrorAction {
+    action: 'error';
+    error: string;
+}
+
+type Action =
+    IErrorAction
+    | ILobbyMemberJoinAction
+    | ILobbyMemberUpdateAction
+    | ILobbyMemberQuitAction
+    | ILobbyDebugAction;
 
 export const closeReasonKicked = 'REASON_KICKED';
 export const closeReasonLeft = 'REASON_LEFT';
 export const closeReasonLeft2 = '';
 
 export class LobbyClient {
-    constructor(private mutate: Mutate) { }
+    constructor(private mutate: Mutate) {
+    }
 
     close(reason: string) {
         this.mutate(state => {
@@ -48,6 +59,11 @@ export class LobbyClient {
     }
 
     message(action: Action) {
+        if (action.action === 'error') {
+            this.mutate(state => {
+                state.error = action.error;
+            });
+        }
         if (action.action === 'lobby-debug') {
             console.log('Lobby debug', (new Date(action.debug) as Date).toLocaleString());
         }

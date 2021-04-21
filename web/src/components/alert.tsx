@@ -51,7 +51,7 @@ export default function Alert(props: Props) {
                         <div className="fixed inset-0 flex flex-row justify-center items-center">
 
                         <div
-                            className="bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            className="bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle m-4 sm:m-0 max-w-lg w-full">
                             <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                 <div className="sm:flex sm:items-start">
                                     <div

@@ -14,6 +14,7 @@ function ConnectionHandler({ children }: any) {
     //     initConnection(mutate);
     // }, []);
 
+    const error = useSelector(state => state.error);
     const connectionLost = useSelector(state => state.connectionLost);
     const connectionLostReason = useSelector(state => state.connectionLostReason);
     const closeReasonUnknown = ![closeReasonKicked, closeReasonLeft, closeReasonLeft2].includes(connectionLostReason);
@@ -43,6 +44,15 @@ function ConnectionHandler({ children }: any) {
                 onActionClick={() => mutate(state => {
                     state.connectionLost = undefined;
                     state.connectionLostReason = undefined;
+                })}
+            />
+            <Alert
+                open={!!error}
+                title="Error"
+                text="An error occured."
+                action="Close"
+                onActionClick={() => mutate(state => {
+                    state.error = undefined;
                 })}
             />
 

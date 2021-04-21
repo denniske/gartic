@@ -71,6 +71,7 @@ export interface ReplayState {
 }
 
 export interface AppState {
+    error?: string;
     connectionLost?: boolean;
     connectionLostReason?: string;
     game: GameState;
