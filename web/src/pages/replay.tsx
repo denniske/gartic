@@ -1,37 +1,26 @@
-import {faArrowRight, faPlay} from "@fortawesome/free-solid-svg-icons";
+import {faArrowLeft, faArrowRight, faPlay} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {useMutate, useSelector} from "~/state/store";
 import {actionReplayBook, actionReplayNextEntry, actionRestart} from "~/components/connection";
 import {useEffect} from "react";
 import {speak} from "~/components/speech";
-import {usePrevious} from "~/hooks/use-previous";
 
 
 export default function Replay() {
     const mutate = useMutate();
     const user = useSelector(state => state.user);
     const storybook = useSelector(state => state.replay.storybook);
-    // const previousStorybook = usePrevious(storybook);
 
     useEffect(() => {
         if (!storybook) return;
 
-        // if (previousStorybook == null || (
-        //     storybook.index === previousStorybook.index &&
-        //     storybook.entries.filter(e => e.shown).length != previousStorybook.entries.filter(e => e.shown).length)
-        // )  {
-        //     const shown = storybook.entries.filter(e => e.shown);
-        //     const lastShown = shown[shown.length-1];
-        //     if (lastShown) {
-        //         speak(lastShown.text);
-        //     }
-        // }
-
-        // const newEntry = storybook.entries.find(e => e.new);
-        // if (newEntry) {
-        //     speak(newEntry.text);
-        // }
-
+        if (storybook.new) {
+            const shown = storybook.entries.filter(e => e.shown);
+            const lastShown = shown[shown.length-1];
+            if (lastShown) {
+                // speak(lastShown.text);
+            }
+        }
     }, [storybook]);
 
     if (!storybook) {
@@ -53,7 +42,8 @@ export default function Replay() {
                         <div className="text-gray-300">
                             {entry.userName}
                         </div>
-                        <div className="bg-gray-300 shadow-sm px-3 py-2 mt-1 block w-full sm:text-sm border-gray-300 rounded-md">
+                        <div
+                            className="bg-gray-300 shadow-sm px-3 py-2 mt-1 block w-full sm:text-sm border-gray-300 rounded-md">
                             {
                                 entry.shown &&
                                 <div>
@@ -63,7 +53,8 @@ export default function Replay() {
                                     }
                                     {
                                         !entry.text &&
-                                        <div className="inline-block uppercase rounded-md px-2 py-1 bg-gray-200 border-gray-500 text-gray-500">
+                                        <div
+                                            className="inline-block uppercase rounded-md px-2 py-1 bg-gray-200 border-gray-500 text-gray-500">
                                             Empty
                                         </div>
                                     }
@@ -89,50 +80,51 @@ export default function Replay() {
                 ))
             }
 
-            {
-                user.admin && storybookComplete && storybook.index > 0 &&
-                <div className="flex flex-row justify-end space-x-4">
-                    <button
-                        onClick={() => actionReplayBook(storybook.index-1)}
-                        className="inline-flex justify-center items-center py-2 px-4 border border-transparent button-shadow text-sm font-medium rounded-md text-white bg-white hover:bg-gray-300"
-                    >
-                        <FontAwesomeIcon className="text-green-500 text-shadow" icon={faArrowRight}/>
-                        <span className="px-4 font-bold uppercase text-purple-900">
+            <div className="flex flex-row space-x-4 justify-end">
+                {
+                    user.admin && storybookComplete && storybook.index > 0 &&
+                    <div className="flex flex-row justify-end space-x-4">
+                        <button
+                            onClick={() => actionReplayBook(storybook.index - 1)}
+                            className="inline-flex justify-center items-center py-2 px-4 border border-transparent button-shadow text-sm font-medium rounded-md text-white bg-white hover:bg-gray-300"
+                        >
+                            <FontAwesomeIcon className="text-green-500 text-shadow" icon={faArrowLeft}/>
+                            <span className="px-4 font-bold uppercase text-purple-900">
                             Previous
                         </span>
-                    </button>
-                </div>
-            }
-            {
-                user.admin && storybookComplete && !storybook.last &&
-                <div className="flex flex-row justify-end space-x-4">
-                    <button
-                        onClick={() => actionReplayBook(storybook.index+1)}
-                        className="inline-flex justify-center items-center py-2 px-4 border border-transparent button-shadow text-sm font-medium rounded-md text-white bg-white hover:bg-gray-300"
-                    >
-                        <FontAwesomeIcon className="text-green-500 text-shadow" icon={faArrowRight}/>
-                        <span className="px-4 font-bold uppercase text-purple-900">
+                        </button>
+                    </div>
+                }
+                {
+                    user.admin && storybookComplete && !storybook.last &&
+                    <div className="flex flex-row justify-end space-x-4">
+                        <button
+                            onClick={() => actionReplayBook(storybook.index + 1)}
+                            className="inline-flex justify-center items-center py-2 px-4 border border-transparent button-shadow text-sm font-medium rounded-md text-white bg-white hover:bg-gray-300"
+                        >
+                            <FontAwesomeIcon className="text-green-500 text-shadow" icon={faArrowRight}/>
+                            <span className="px-4 font-bold uppercase text-purple-900">
                             Next
                         </span>
-                    </button>
-                </div>
-            }
-            {
-                user.admin && storybookComplete && storybook.last &&
-                <div className="flex flex-row justify-end space-x-4">
-                    <button
-                        onClick={() => actionRestart()}
-                        // onClick={() => mutate(returnToLobby())}
-                        className="inline-flex justify-center items-center py-2 px-4 border border-transparent button-shadow text-sm font-medium rounded-md text-white bg-white hover:bg-gray-300"
-                    >
-                        <FontAwesomeIcon className="text-green-500 text-shadow" icon={faPlay}/>
-                        <span className="px-4 font-bold uppercase text-purple-900">
+                        </button>
+                    </div>
+                }
+                {
+                    user.admin && storybookComplete && storybook.last &&
+                    <div className="flex flex-row justify-end space-x-4">
+                        <button
+                            onClick={() => actionRestart()}
+                            // onClick={() => mutate(returnToLobby())}
+                            className="inline-flex justify-center items-center py-2 px-4 border border-transparent button-shadow text-sm font-medium rounded-md text-white bg-white hover:bg-gray-300"
+                        >
+                            <FontAwesomeIcon className="text-green-500 text-shadow" icon={faPlay}/>
+                            <span className="px-4 font-bold uppercase text-purple-900">
                             New Round
                         </span>
-                    </button>
-                </div>
-            }
-
+                        </button>
+                    </div>
+                }
+            </div>
         </div>
     );
 }

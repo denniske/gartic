@@ -12,6 +12,7 @@ export interface IPlayer {
 }
 
 export interface IStorybook {
+    new: boolean;
     index: number;
     entries: IStorybookEntry[];
     user: IPlayer;
@@ -23,5 +24,4 @@ export interface IStorybookEntry {
     userName: string;
     text: string;
     shown: boolean;
-    new: boolean;
 }

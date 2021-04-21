@@ -8,7 +8,6 @@ interface IStoryEntry {
     userName: string;
     text: string;
     shown: boolean;
-    new: boolean;
 }
 
 interface IStoryEditAction {
@@ -67,6 +66,26 @@ interface IStorybook {
     entries: IStoryEntry[];
     user: IMember;
     last?: boolean;
+    new?: boolean;
+}
+
+const dummyNames = ['Dennis', 'John'];
+
+function createDummyStory(userId: string, index: number): IStoryEntry[] {
+    return [
+        {
+            userId: userId,
+            userName: dummyNames[index],
+            text: dummyNames[index]+'0',
+            shown: true,
+        },
+        {
+            userId: userId,
+            userName: dummyNames[(index+1)%2],
+            text: dummyNames[(index+1)%2]+'1',
+            shown: false,
+        },
+    ];
 }
 
 export default class GameServer {
@@ -85,7 +104,7 @@ export default class GameServer {
         return this.storybooks.find(s => s.user.id == memberId)!;
     }
 
-    sendStorybook(index: number, markLastEntryAsNew: boolean = false) {
+    sendStorybook(index: number) {
         const storybook = this.storybooks[index];
 
         const entriesToSend = [];
@@ -98,24 +117,18 @@ export default class GameServer {
             }
         }
 
-        // if (markLastEntryAsNew) {
-        //     const shown = entriesToSend.filter(e => e.shown);
-        //     const lastShown = shown[shown.length-1];
-        //     lastShown.new = true;
-        // }
-
         this.chatRoom.broadcast({
             action: 'storybook',
             storybook: {
-                index,
-                last: index == this.storybooks.length - 1,
+                ...storybook,
                 entries: entriesToSend,
-                user: {
-                    id: storybook.user.id,
-                    name: storybook.user.name,
-                },
-            }
+            },
         });
+
+        const storybookComplete = storybook.entries.every(e => e.shown);
+        if (storybookComplete) {
+            storybook.new = false;
+        }
     }
 
     markLastStorybookEntryAsShown() {
@@ -167,6 +180,7 @@ export default class GameServer {
                 index: i,
                 user: m,
                 entries: [],
+                last: i == this.members.length - 1,
             }));
             this.chatRoom.broadcast({action: 'start', time: new Date()});
             this.startTimer();
@@ -174,17 +188,36 @@ export default class GameServer {
         if (action.action === 'restart') {
             this.chatRoom.broadcast({action: 'restart'});
         }
+
         if (action.action === 'replay') {
+            // this.members = cloneDeep(this.lobbyServer.members);
+            // this.storybooks = [
+            //     {
+            //         index: 0,
+            //         entries: createDummyStory(this.members[0].id!, 0),
+            //         user: this.members[0],
+            //         last: false,
+            //         new: true,
+            //     },
+            //     {
+            //         index: 1,
+            //         entries: createDummyStory(this.members[1].id!, 1),
+            //         user: this.members[1],
+            //         last: false,
+            //         new: true,
+            //     },
+            // ]
             this.chatRoom.broadcast({action: 'replay'});
-            this.sendStorybook(0, true);
+            this.sendStorybook(0);
         }
         if (action.action === 'replayNextEntry') {
             const index = this.markLastStorybookEntryAsShown();
-            this.sendStorybook(index, true);
+            this.sendStorybook(index);
         }
         if (action.action === 'replayBook') {
             this.sendStorybook(action.index);
         }
+
         if (action.action === 'storyEdit') {
             const member = this.members.find(m => m.sessionId == sessionId);
 
@@ -228,7 +261,6 @@ export default class GameServer {
                         userName: m.name!,
                         text: m.currentInput!,
                         shown: true,
-                        new: false,
                     });
                 }
                 this.state = State.ContinueStory;
@@ -245,7 +277,6 @@ export default class GameServer {
                         userName: m.name!,
                         text: m.currentInput!,
                         shown: false,
-                        new: false,
                     });
                 }
                 this.members.forEach(m => m.currentInput = '');
