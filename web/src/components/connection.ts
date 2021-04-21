@@ -11,7 +11,7 @@ import {
     updateUser
 } from "~/state/action";
 import {GameClient} from "~/client/game-client";
-import {LobbyClient} from "~/client/lobby-client";
+import {closeReasonLeft, LobbyClient} from "~/client/lobby-client";
 
 
 let client = null;
@@ -57,6 +57,7 @@ export function initConnection(_mutate: Mutate, code: string): Promise<void> {
         client.onclose = (event: ICloseEvent) => {
             mutate(disconnected());
 
+            console.log('closed', event);
             lobbyClient.close(event.reason);
 
             // if (event.reason === closeReasonKicked) {
@@ -116,7 +117,7 @@ export function actionStoryDone(text: string) {
 
 export function quit() {
     mutate(updateUser({id: undefined, name: undefined}));
-    client.close();
+    client.close(3000, closeReasonLeft);
 }
 
 

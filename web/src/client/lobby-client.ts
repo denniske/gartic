@@ -25,6 +25,8 @@ interface ILobbyMemberQuitAction {
 type Action = ILobbyMemberJoinAction | ILobbyMemberUpdateAction | ILobbyMemberQuitAction | ILobbyDebugAction;
 
 export const closeReasonKicked = 'REASON_KICKED';
+export const closeReasonLeft = 'REASON_LEFT';
+export const closeReasonLeft2 = '';
 
 export class LobbyClient {
     constructor(private mutate: Mutate) { }
@@ -36,6 +38,9 @@ export class LobbyClient {
         });
         if (reason === closeReasonKicked) {
             console.log('You were kicked.');
+            this.mutate(updateUser({id: undefined, name: undefined}));
+        } else if (reason === closeReasonLeft || reason === closeReasonLeft2) {
+            console.log('You left the lobby.');
             this.mutate(updateUser({id: undefined, name: undefined}));
         } else {
             console.log('Connection lost.', event);

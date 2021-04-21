@@ -4,7 +4,7 @@ import {initConnection} from "~/components/connection";
 import {useMutate, useSelector, useStore} from "~/state/store";
 import {Provider} from "react-redux";
 import Alert from "~/components/alert";
-import {closeReasonKicked} from "~/client/lobby-client";
+import {closeReasonKicked, closeReasonLeft, closeReasonLeft2} from "~/client/lobby-client";
 import {updateUser} from "~/state/action";
 
 function ConnectionHandler({ children }: any) {
@@ -16,16 +16,17 @@ function ConnectionHandler({ children }: any) {
 
     const connectionLost = useSelector(state => state.connectionLost);
     const connectionLostReason = useSelector(state => state.connectionLostReason);
+    const closeReasonUnknown = ![closeReasonKicked, closeReasonLeft, closeReasonLeft2].includes(connectionLostReason);
 
     const [open, setOpen] = useState(false);
 
     return (
         <div>
             <Alert
-                open={!!connectionLost && connectionLostReason != closeReasonKicked}
+                open={!!connectionLost && closeReasonUnknown}
                 title="Connection lost."
                 text="The connection to the server has been lost."
-                action="Close"
+                action="Return to Home"
                 onActionClick={() => {
                     mutate(state => {
                         state.connectionLost = undefined;

@@ -197,6 +197,8 @@ export default class GameServer {
             }));
             this.chatRoom.broadcast({action: 'start', time: new Date()});
             this.startTimer();
+
+
         }
         if (action.action === 'restart') {
             this.chatRoom.broadcast({action: 'restart'});
@@ -257,6 +259,13 @@ export default class GameServer {
 
             const playersDoneCount = this.members.filter(m => m.done).length;
             this.chatRoom.broadcast({action: 'playersDone', count: playersDoneCount});
+
+
+            // const state = JSON.stringify([this.members, this.storybooks]);
+            const state = JSON.stringify(this.storybooks);
+            console.log('size', Buffer.byteLength(state, 'utf8')/1000, 'kB');
+            console.log('size', Buffer.byteLength('1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890', 'utf8')/1000, 'kB');
+
 
             if (this.members.filter(m => m.connected).every(m => m.done)) {
                 this.newRound();
