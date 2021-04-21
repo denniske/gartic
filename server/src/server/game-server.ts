@@ -59,6 +59,7 @@ interface IGameMember extends IMember {
     currentTargetIndex?: number;
     currentInput?: string;
     done?: boolean;
+    connected: boolean;
 }
 
 interface IStorybook {
@@ -94,6 +95,7 @@ export default class GameServer {
     timerStarted?: Date;
 
     members: IGameMember[] = [];
+
     pairings: Pairing[] = [];
     storybooks: IStorybook[] = [];
 
@@ -158,7 +160,15 @@ export default class GameServer {
     }
 
     close(sessionId: string) {
+        const member = this.members.find(m => m.sessionId == sessionId);
+        const memberIndex = this.members.findIndex(m => m.sessionId == sessionId);
 
+        console.log('CLOSED', memberIndex, sessionId);
+
+        if (member != null) {
+            member.connected = false;
+            remove(this.pairings, p => p[0] == memberIndex || p[1] == memberIndex);
+        }
     }
 
     startTimer() {
@@ -174,7 +184,10 @@ export default class GameServer {
         if (action.action === 'start') {
             this.state = State.StartStory;
             this.storyLength = 0;
-            this.members = cloneDeep(this.lobbyServer.members);
+            this.members = this.lobbyServer.members.map(member => ({
+                ...member,
+                connected: true,
+            }));
             this.pairings = generatePairings(this.members.length);
             this.storybooks = this.members.map((m, i) => ({
                 index: i,
@@ -245,7 +258,7 @@ export default class GameServer {
             const playersDoneCount = this.members.filter(m => m.done).length;
             this.chatRoom.broadcast({action: 'playersDone', count: playersDoneCount});
 
-            if (playersDoneCount === this.members.length) {
+            if (this.members.filter(m => m.connected).every(m => m.done)) {
                 this.newRound();
             }
         }
@@ -286,7 +299,7 @@ export default class GameServer {
         }
 
         // Distribute stories randomly
-        if (this.storyLength < this.members.length) {
+        if (this.storyLength < this.members.filter(m => m.connected).length) {
             this.chatRoom.broadcast({action: 'nextRound', round: this.storyLength, time: new Date()});
             this.startTimer();
 
