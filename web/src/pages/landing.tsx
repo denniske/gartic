@@ -3,13 +3,11 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {useMutate, useSelector} from "~/state/store";
 import {useRouter} from "next/router";
 import {KeyboardEvent, useEffect, useState} from "react";
-import {actionStoryDone, initConnection, lobbyJoin} from "~/components/connection";
+import {initConnection, lobbyJoin} from "~/components/connection";
 
 
 export default function Landing() {
     const router = useRouter();
-    const connected = useSelector(state => state.connected);
-    const user = useSelector(state => state.user);
     const [placeholderName, setPlaceholderName] = useState('');
     const [name, setName] = useState('');
     const mutate = useMutate();
@@ -50,7 +48,6 @@ export default function Landing() {
 
     return (
         <div className="p-4 flex flex-col max-w-7xl space-y-5">
-
             {
                 code &&
                 <div className="text-gray-100 uppercase">

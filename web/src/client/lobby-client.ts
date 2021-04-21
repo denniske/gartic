@@ -24,12 +24,16 @@ interface ILobbyMemberQuitAction {
 
 type Action = ILobbyMemberJoinAction | ILobbyMemberUpdateAction | ILobbyMemberQuitAction | ILobbyDebugAction;
 
-const closeReasonKicked = 'REASON_KICKED';
+export const closeReasonKicked = 'REASON_KICKED';
 
 export class LobbyClient {
     constructor(private mutate: Mutate) { }
 
     close(reason: string) {
+        this.mutate(state => {
+            state.connectionLost = true;
+            state.connectionLostReason = reason;
+        });
         if (reason === closeReasonKicked) {
             console.log('You were kicked.');
             this.mutate(updateUser({id: undefined, name: undefined}));
