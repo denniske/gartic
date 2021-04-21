@@ -263,9 +263,8 @@ export default class GameServer {
 
             // const state = JSON.stringify([this.members, this.storybooks]);
             const state = JSON.stringify(this.storybooks);
-            console.log('size', Buffer.byteLength(state, 'utf8')/1000, 'kB');
-            console.log('size', Buffer.byteLength('1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890', 'utf8')/1000, 'kB');
-
+            // console.log('size', Buffer.byteLength(state, 'utf8')/1000, 'kB');
+            // console.log('size', Buffer.byteLength('1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890', 'utf8')/1000, 'kB');
 
             if (this.members.filter(m => m.connected).every(m => m.done)) {
                 this.newRound();
